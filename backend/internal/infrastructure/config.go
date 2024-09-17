@@ -19,9 +19,10 @@ type (
 	}
 
 	WebAPI struct {
-		Host            string `mapstructure:"host"`
-		Port            int    `mapstructure:"port"`
-		ReadTimeout     int    `mapstructure:"read_timeout"`
-		ShutdownTimeout int    `mapstructure:"shutdown_timeout"`
+		Host         string `mapstructure:"host"`
+		Port         int    `mapstructure:"port"`
+		ReadTimeout  int    `mapstructure:"read_timeout"`
+		WriteTimeout int    `mapstructure:"write_timeout"`
+		IdleTimeout  int    `mapstructure:"idle_timeout"`
 	}
 )
