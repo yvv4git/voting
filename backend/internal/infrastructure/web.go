@@ -16,11 +16,16 @@ type GinServerWrapper struct {
 	log    *slog.Logger
 }
 
-func NewWebServer(log *slog.Logger, router *gin.Engine, addr string) *GinServerWrapper {
+func NewWebServer(log *slog.Logger, router *gin.Engine, cfg WebAPI) *GinServerWrapper {
+	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+
 	return &GinServerWrapper{
 		server: &http.Server{
-			Addr:    addr,
-			Handler: router,
+			Addr:         addr,
+			Handler:      router,
+			ReadTimeout:  time.Duration(cfg.ReadTimeout) * time.Second,
+			WriteTimeout: time.Duration(cfg.WriteTimeout) * time.Second,
+			IdleTimeout:  time.Duration(cfg.IdleTimeout) * time.Second,
 		},
 		log: log,
 	}

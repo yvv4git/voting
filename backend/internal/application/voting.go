@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/gin-gonic/gin"
@@ -43,7 +42,7 @@ func (a *VotingApp) start(ctx context.Context) error {
 
 	// Init web server.
 	webCfg := a.cfg.VotingApp.WebAPI
-	webServer := infrastructure.NewWebServer(a.log, r, fmt.Sprintf("%s:%d", webCfg.Host, webCfg.Port))
+	webServer := infrastructure.NewWebServer(a.log, r, webCfg)
 	if err := webServer.Run(ctx); err != nil {
 		return err
 	}
