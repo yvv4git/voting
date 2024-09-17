@@ -2,9 +2,12 @@ package application
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
+	"github.com/gin-gonic/gin"
 	"github.com/yvv4git/voiting/backend/internal/infrastructure"
+	"github.com/yvv4git/voiting/backend/internal/interfaces/web"
 )
 
 type VotingApp struct {
@@ -32,6 +35,18 @@ func (a *VotingApp) start(ctx context.Context) error {
 	a.log.Info("config",
 		slog.Any("voting_service.web", a.cfg.VotingApp.WebAPI),
 	)
+
+	// Init web router.
+	r := gin.Default()
+	webHandler := web.NewVotingHandler()
+	webHandler.Register(r)
+
+	// Init web server.
+	webCfg := a.cfg.VotingApp.WebAPI
+	webServer := infrastructure.NewWebServer(a.log, r, fmt.Sprintf("%s:%d", webCfg.Host, webCfg.Port))
+	if err := webServer.Run(ctx); err != nil {
+		return err
+	}
 
 	return nil
 }
