@@ -7,7 +7,7 @@
       </li>
     </ul>
   </div>
-  <div v-else>
+  <div v-else class="no-voting-selected">
     <p>Выберите голосование слева, чтобы увидеть детали.</p>
   </div>
 </template>
@@ -33,12 +33,28 @@ export default {
 <style scoped>
 .voting-details {
   width: 50%;
-  float: right;
+  background-color: #ffffff;
+  padding: 20px;
+  box-sizing: border-box;
+  border-left: 1px solid #ccc;
 }
+
+.no-voting-selected {
+  width: 50%;
+  background-color: #f0f0f0;
+  padding: 20px;
+  box-sizing: border-box;
+  border-left: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 ul {
   list-style-type: none;
   padding: 0;
 }
+
 li {
   padding: 10px;
   border-bottom: 1px solid #ccc;
