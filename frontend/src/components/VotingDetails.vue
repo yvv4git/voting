@@ -4,6 +4,7 @@
     <ul>
       <li v-for="(option, index) in selectedVoting.options" :key="index">
         {{ option }} - {{ votes[index] }} голосов
+        <button @click="voteForOption(index)">Голосовать</button>
       </li>
     </ul>
   </div>
@@ -24,8 +25,20 @@ export default {
   },
   data() {
     return {
-      votes: [0, 0, 0], // Пример голосов для каждого варианта
+      votes: this.selectedVoting ? this.selectedVoting.options.map(() => 0) : [], // Инициализация голосов для каждого варианта
     };
+  },
+  methods: {
+    voteForOption(index) {
+      this.$data.votes[index] += 1;
+    },
+  },
+  watch: {
+    selectedVoting(newVoting) {
+      if (newVoting) {
+        this.votes = newVoting.options.map(() => 0);
+      }
+    },
   },
 };
 </script>
@@ -58,5 +71,21 @@ ul {
 li {
   padding: 10px;
   border-bottom: 1px solid #ccc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+button {
+  padding: 5px 10px;
+  cursor: pointer;
+  background-color: #42b983;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+button:hover {
+  background-color: #3da87a;
 }
 </style>
