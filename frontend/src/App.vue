@@ -1,17 +1,36 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app">
+    <WalletConnect />
+    <div class="voting-container">
+      <VotingList @select-voting="onSelectVoting" />
+      <VotingDetails :selectedVoting="selectedVoting" />
+    </div>
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import VotingList from './components/VotingList.vue';
+import VotingDetails from './components/VotingDetails.vue';
+import WalletConnect from './components/WalletConnect.vue';
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
-  }
-}
+    VotingList,
+    VotingDetails,
+    WalletConnect,
+  },
+  data() {
+    return {
+      selectedVoting: null,
+    };
+  },
+  methods: {
+    onSelectVoting(voting) {
+      this.selectedVoting = voting;
+    },
+  },
+};
 </script>
 
 <style>
@@ -22,5 +41,8 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+.voting-container {
+  display: flex;
 }
 </style>
