@@ -4,12 +4,12 @@
     <ul>
       <li v-for="(option, index) in selectedVoting.options" :key="index">
         {{ option }} - {{ votes[index] }} голосов
-        <button @click="voteForOption(index)">Голосовать</button>
+        <button @click="voteForOption(index)">Vote</button>
       </li>
     </ul>
   </div>
   <div v-else class="no-voting-selected">
-    <p>Выберите голосование слева, чтобы увидеть детали.</p>
+    <p>Select the vote on the left to see the details.</p>
   </div>
 </template>
 

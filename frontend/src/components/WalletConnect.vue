@@ -1,6 +1,6 @@
 <template>
   <div class="wallet-connect">
-    <button @click="connectWallet">Подключить кошелек</button>
+    <button @click="connectWallet">Connect a wallet</button>
   </div>
 </template>
 

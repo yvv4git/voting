@@ -1,14 +1,14 @@
 <template>
   <div class="modal-overlay" v-if="showModal" @click="closeModal">
     <div class="modal-content" @click.stop>
-      <h2>Добавить новое голосование</h2>
+      <h2>Add a new voteе</h2>
       <form @submit.prevent="addVoting">
         <div class="form-group">
-          <label for="title">Название голосования:</label>
+          <label for="title">The name of the vote:</label>
           <input type="text" id="title" v-model="newVoting.title" required />
         </div>
         <div class="form-group" v-for="(option, index) in newVoting.options" :key="index">
-          <label :for="'option' + index">Вариант {{ index + 1 }}:</label>
+          <label :for="'option' + index"> {{ index + 1 }}:</label>
           <input
             type="text"
             :id="'option' + index"
@@ -16,8 +16,17 @@
             required
           />
         </div>
-        <button type="button" @click="addOption">Добавить вариант</button>
-        <button type="submit">Создать голосование</button>
+        <div class="form-group">
+          <label for="votingEnd">When does the voting end:</label>
+          <input
+            type="datetime-local"
+            id="votingEnd"
+            v-model="newVoting.votingEnd"
+            required
+          />
+        </div>
+        <button type="button" @click="addOption">Add an option</button>
+        <button type="submit">Create a vote</button>
       </form>
     </div>
   </div>
@@ -37,6 +46,7 @@ export default {
       newVoting: {
         title: "",
         options: ["", ""], // Начальные два варианта
+        votingEnd: "", // Поле для даты и времени окончания голосования
       },
     };
   },
@@ -93,11 +103,7 @@ input {
 
 button {
   padding: 10px 20px;
-  font-size: 16px;
+  margin-right: 10px;
   cursor: pointer;
-  background-color: #2c3e50;
-  color: white;
-  border: none;
-  border-radius: 4px;
 }
 </style>

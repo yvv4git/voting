@@ -3,7 +3,7 @@
     <header class="app-header">
       <div class="header-buttons">
         <WalletConnect />
-        <button @click="openModal">Добавить голосование</button>
+        <button @click="openModal">Add a vote</button>
       </div>
     </header>
     <div class="voting-container">
@@ -15,7 +15,7 @@
       <VotingDetails :selectedVoting="selectedVoting" />
     </div>
     <footer class="app-footer">
-      <p>&copy; 2023 Your Company. All rights reserved.</p>
+      <p>&copy; 2023 Eliseev V.V. All rights reserved.</p>
     </footer>
     <AddVotingModal
       :showModal="showModal"
@@ -77,7 +77,7 @@ export default {
     },
     addVoting(newVoting) {
       const newId = Math.max(...this.votings.map((v) => v.id)) + 1;
-      this.votings.push({ id: newId, ...newVoting, votingEnd: "2023-12-31T23:59:59" }); // Добавляем дату окончания голосования
+      this.votings.push({ id: newId, ...newVoting });
     },
   },
 };

@@ -5,7 +5,7 @@
         <div @click="selectVoting(voting)" class="voting-item">
           {{ voting.title }} (Заканчивается: {{ formatDate(voting.votingEnd) }})
         </div>
-        <button @click="deleteVoting(voting.id)" class="delete-button">Удалить</button>
+        <button @click="deleteVoting(voting.id)" class="delete-button">Delete</button>
       </li>
     </ul>
   </div>
