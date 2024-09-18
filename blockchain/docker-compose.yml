@@ -1,0 +1,9 @@
+services:
+  ganache:
+    image: moikapy/moiganache
+    command: 'ganache-cli -h 0.0.0.0 -s 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef --acctKeys /usr/app/accounts.json --chainId 12345 -q -n'
+    restart: no
+    volumes:
+      - ${PWD}/accounts.json:/usr/app/accounts.json
+    ports:
+      - '8545:8545'
