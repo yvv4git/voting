@@ -44,11 +44,13 @@ export default {
           id: 1,
           title: "Голосование за еду на вечер",
           options: ["Пицца", "Пирожки", "Торт"],
+          votingEnd: "2023-12-31T23:59:59", // Пример даты окончания голосования
         },
         {
           id: 2,
           title: "Голосование за фильм на вечер",
           options: ["Терминатор", "Титаник", "Аватар"],
+          votingEnd: "2023-11-30T23:59:59", // Пример даты окончания голосования
         },
       ],
     };
@@ -65,7 +67,7 @@ export default {
     },
     addVoting(newVoting) {
       const newId = Math.max(...this.votings.map((v) => v.id)) + 1;
-      this.votings.push({ id: newId, ...newVoting });
+      this.votings.push({ id: newId, ...newVoting, votingEnd: "2023-12-31T23:59:59" }); // Добавляем дату окончания голосования
     },
   },
 };

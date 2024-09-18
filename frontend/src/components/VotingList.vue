@@ -2,7 +2,7 @@
   <div class="voting-list">
     <ul>
       <li v-for="voting in votings" :key="voting.id" @click="selectVoting(voting)">
-        {{ voting.title }}
+        {{ voting.title }} (Заканчивается: {{ formatDate(voting.votingEnd) }})
       </li>
     </ul>
   </div>
@@ -20,6 +20,10 @@ export default {
   methods: {
     selectVoting(voting) {
       this.$emit("select-voting", voting);
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleString();
     },
   },
 };
