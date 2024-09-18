@@ -1,8 +1,11 @@
 <template>
   <div class="voting-list">
     <ul>
-      <li v-for="voting in votings" :key="voting.id" @click="selectVoting(voting)">
-        {{ voting.title }} (Заканчивается: {{ formatDate(voting.votingEnd) }})
+      <li v-for="voting in votings" :key="voting.id">
+        <div @click="selectVoting(voting)" class="voting-item">
+          {{ voting.title }} (Заканчивается: {{ formatDate(voting.votingEnd) }})
+        </div>
+        <button @click="deleteVoting(voting.id)" class="delete-button">Удалить</button>
       </li>
     </ul>
   </div>
@@ -20,6 +23,9 @@ export default {
   methods: {
     selectVoting(voting) {
       this.$emit("select-voting", voting);
+    },
+    deleteVoting(votingId) {
+      this.$emit("delete-voting", votingId);
     },
     formatDate(dateString) {
       const date = new Date(dateString);
@@ -46,10 +52,26 @@ li {
   cursor: pointer;
   padding: 10px;
   border-bottom: 1px solid #ccc;
-  transition: background-color 0.3s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-li:hover {
-  background-color: #e0e0e0;
+.voting-item {
+  flex-grow: 1;
+}
+
+.delete-button {
+  padding: 5px 10px;
+  cursor: pointer;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  margin-left: 10px;
+}
+
+.delete-button:hover {
+  background-color: #e60000;
 }
 </style>

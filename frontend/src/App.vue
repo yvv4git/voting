@@ -7,7 +7,11 @@
       </div>
     </header>
     <div class="voting-container">
-      <VotingList @select-voting="onSelectVoting" :votings="votings" />
+      <VotingList
+        @select-voting="onSelectVoting"
+        @delete-voting="onDeleteVoting"
+        :votings="votings"
+      />
       <VotingDetails :selectedVoting="selectedVoting" />
     </div>
     <footer class="app-footer">
@@ -58,6 +62,12 @@ export default {
   methods: {
     onSelectVoting(voting) {
       this.selectedVoting = voting;
+    },
+    onDeleteVoting(votingId) {
+      this.votings = this.votings.filter((voting) => voting.id !== votingId);
+      if (this.selectedVoting && this.selectedVoting.id === votingId) {
+        this.selectedVoting = null;
+      }
     },
     openModal() {
       this.showModal = true;
