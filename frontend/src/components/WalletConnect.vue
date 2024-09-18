@@ -1,6 +1,6 @@
 <template>
   <div class="wallet-connect">
-    <button @click="connectWallet">Подключить MetaMask</button>
+    <button @click="connectWallet">Подключить кошелек</button>
   </div>
 </template>
 
@@ -30,11 +30,18 @@ export default {
 
 <style scoped>
 .wallet-connect {
-  margin-bottom: 20px;
+  margin-bottom: 0px;
 }
 button {
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+button:hover {
+  background-color: #3a5168;
 }
 </style>

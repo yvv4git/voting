@@ -1,8 +1,10 @@
 <template>
   <div id="app">
     <header class="app-header">
-      <WalletConnect />
-      <button @click="openModal">Добавить голосование</button>
+      <div class="header-buttons">
+        <WalletConnect />
+        <button @click="openModal">Добавить голосование</button>
+      </div>
     </header>
     <div class="voting-container">
       <VotingList @select-voting="onSelectVoting" :votings="votings" />
@@ -92,6 +94,11 @@ export default {
   align-items: center;
 }
 
+.header-buttons {
+  display: flex;
+  align-items: center;
+}
+
 .app-footer {
   background-color: #2c3e50;
   color: white;
@@ -111,6 +118,7 @@ button {
   color: white;
   border: none;
   border-radius: 4px;
+  margin-left: 10px;
 }
 
 button:hover {

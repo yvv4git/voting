@@ -93,7 +93,11 @@ input {
 
 button {
   padding: 10px 20px;
-  margin-right: 10px;
+  font-size: 16px;
   cursor: pointer;
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  border-radius: 4px;
 }
 </style>
