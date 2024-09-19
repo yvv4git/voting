@@ -20,4 +20,4 @@ hardhat_node:
 	npx hardhat node
 
 run_contract:
-	npx hardhat run --network localhost scripts/voting_list_create.js
+	npx hardhat run --network localhost scripts/voting_list.js

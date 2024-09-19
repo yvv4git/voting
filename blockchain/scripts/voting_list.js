@@ -10,14 +10,9 @@ async function main() {
 
     console.log("Contract deployed to:", await contractVotingList.getAddress());
 
-    // Подписка на событие DebugLog
-    contractVotingList.on("DebugLog", (message, value, event) => {
-        console.log(`DebugLog: ${message}, Value: ${value}`);
-    });
-
     // Создание голосования
     const votingName = "Test Voting";
-    const finishAt = Math.floor(Date.now() / 1000) + 60; // Завершение через 1 мин
+    const finishAt = Math.floor(Date.now() / 1000) + 3; // Завершение через 3 секунды
     const options = ["Option 1", "Option 2", "Option 3"];
     const commission = ethers.parseEther("0.1"); // 0.1 ETH
 
@@ -37,6 +32,17 @@ async function main() {
     // Получение результатов голосования
     const votes = await contractVotingList.getVotes(votingId);
     console.log("Votes:", votes);
+
+    // Добавляем задержку в 4 секунды перед удалением голосования
+    await new Promise(resolve => setTimeout(resolve, 4000));
+
+    // Удаление голосования
+    try {
+        await contractVotingList.deleteVoting(votingId);
+        console.log("Voting deleted");
+    } catch (error) {
+        console.error("Error deleting voting:", error.message);
+    }
 }
 
 main()

@@ -1,4 +1,4 @@
-const { ethers } = require("hardhat");
+import { ethers } from "hardhat";
 
 async function main() {
     const [user1] = await ethers.getSigners();
@@ -9,11 +9,6 @@ async function main() {
     // Подключение к уже развернутому контракту
     const VotingList = await ethers.getContractFactory("VotingList");
     const contractVotingList = await VotingList.attach(contractAddress);
-
-    // Подписка на событие DebugLog
-    contractVotingList.on("DebugLog", (message, value, event) => {
-        console.log(`DebugLog: ${message}, Value: ${value}`);
-    });
 
     // Удаление голосования
     const votingId = 0;
