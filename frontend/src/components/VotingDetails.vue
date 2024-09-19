@@ -3,7 +3,7 @@
     <h2>{{ selectedVoting.title }}</h2>
     <ul>
       <li v-for="(option, index) in selectedVoting.options" :key="index">
-        {{ option }} - {{ votes[index] }} голосов
+        {{ option }} - {{ votes[index] }} number of votes
         <button @click="voteForOption(index)">Vote</button>
       </li>
     </ul>

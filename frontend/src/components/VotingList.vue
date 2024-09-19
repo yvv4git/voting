@@ -3,7 +3,7 @@
     <ul>
       <li v-for="voting in votings" :key="voting.id">
         <div @click="selectVoting(voting)" class="voting-item">
-          {{ voting.title }} (Заканчивается: {{ formatDate(voting.votingEnd) }})
+          {{ voting.title }} (Finish: {{ formatDate(voting.votingEnd) }})
         </div>
         <button @click="deleteVoting(voting.id)" class="delete-button">Delete</button>
       </li>
