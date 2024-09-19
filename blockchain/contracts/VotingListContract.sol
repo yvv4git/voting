@@ -34,6 +34,7 @@ contract VotingList {
     );
     event Voted(uint256 indexed votingId, uint256 optionId, address voter);
     event VotingDeleted(uint256 indexed votingId);
+    event DebugLog(string message, uint256 value); // Дополнительное событие для отладки
 
     // Method for creating voting
     function createVoting(
@@ -92,15 +93,19 @@ contract VotingList {
 
     // Method for deleting voting
     function deleteVoting(uint256 _votingId) public {
+        emit DebugLog("Checking if voting has ended", _votingId);
         require(
             votings[_votingId].finishAt <= block.timestamp,
             "Voting has not yet ended"
         );
+
+        emit DebugLog("Checking if voting has already been deleted", _votingId);
         require(
             votings[_votingId].deleted_at == 0,
             "Voting has already been deleted"
         );
 
+        emit DebugLog("Setting deleted_at timestamp", _votingId);
         votings[_votingId].deleted_at = block.timestamp;
 
         emit VotingDeleted(_votingId);
@@ -121,7 +126,6 @@ contract VotingList {
         for (uint256 i = 0; i < voting.optionsCount; i++) {
             votes[i] = voting.options[i].points;
         }
-
         return votes;
     }
 }
