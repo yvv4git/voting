@@ -31,10 +31,12 @@ async function main() {
 
     // Получение результатов голосования
     const votes = await contractVotingList.getVotes(votingId);
+    const voting = await contractVotingList.votings(votingId);
+    console.log(`Voting Name: ${voting.name}`);
     console.log("Votes:", votes);
 
     // Добавляем задержку в 4 секунды перед удалением голосования
-    await new Promise(resolve => setTimeout(resolve, 4000));
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
     // Удаление голосования
     try {
