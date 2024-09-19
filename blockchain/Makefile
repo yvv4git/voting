@@ -19,5 +19,8 @@ hardhat_compile:
 hardhat_node:
 	npx hardhat node
 
-run_contract:
+hardhat_deploy:
 	npx hardhat run --network localhost scripts/voting_list.js
+
+hardhat_test:
+	npx hardhat test
