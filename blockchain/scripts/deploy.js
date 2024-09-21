@@ -1,8 +1,8 @@
 const { ethers } = require("hardhat");
 
+// Run:
+// npx hardhat run --network localHardhat scripts/deploy.js
 async function main() {
-    // Run:
-    // npx hardhat run --network localHardhat scripts/deploy.js
     // Получаем все кошельки
     const signers = await ethers.getSigners();
 

@@ -3,12 +3,6 @@
 pragma solidity ^0.8.0;
 
 contract VotingList {
-    // List of votings
-    mapping(uint256 => Voting) public votings;
-
-    // Number of votings
-    uint256 public votingsCount;
-
     // Voting structure
     struct Voting {
         string name; // Voting name
@@ -25,6 +19,17 @@ contract VotingList {
         string name; // Option name
         uint256 points; // Number of points
     }
+
+    // Structure for returning voting data
+    struct VotingData {
+        uint256 id; // Voting ID
+        string name; // Voting name
+        uint256 finishAt; // Timestamp of voting end
+        bool isDeleted; // Status (deleted or not)
+    }
+
+    // List of votings
+    Voting[] public votings;
 
     // Events
     event VotingCreated(
@@ -47,7 +52,7 @@ contract VotingList {
             "Insufficient funds to pay the commission"
         );
 
-        Voting storage voting = votings[votingsCount];
+        Voting storage voting = votings.push();
         voting.name = _name;
         voting.finishAt = _finishAt;
         voting.commission = _commission;
@@ -61,9 +66,7 @@ contract VotingList {
             voting.options[i] = option;
         }
 
-        votingsCount++;
-
-        emit VotingCreated(votingsCount - 1, _name, _finishAt);
+        emit VotingCreated(votings.length - 1, _name, _finishAt);
     }
 
     // Method for voting
@@ -137,5 +140,21 @@ contract VotingList {
         );
 
         return voting.options[_optionId];
+    }
+
+    // Method for getting all votings
+    function getAllVotings() public view returns (VotingData[] memory) {
+        VotingData[] memory votingDataList = new VotingData[](votings.length);
+
+        for (uint256 i = 0; i < votings.length; i++) {
+            votingDataList[i] = VotingData({
+                id: i,
+                name: votings[i].name,
+                finishAt: votings[i].finishAt,
+                isDeleted: votings[i].deleted_at != 0
+            });
+        }
+
+        return votingDataList;
     }
 }

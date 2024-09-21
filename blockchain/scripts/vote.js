@@ -1,5 +1,7 @@
 const { ethers } = require("hardhat");
 
+// Run:
+// npx hardhat run --network localHardhat scripts/vote.js
 async function main() {
     const [user1] = await ethers.getSigners();
 
