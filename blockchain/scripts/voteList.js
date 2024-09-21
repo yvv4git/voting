@@ -20,7 +20,14 @@ async function main() {
         console.log(`Voting ID: ${i}`);
         console.log(`Name: ${voting.name}`);
         console.log(`Finish At: ${new Date(Number(voting.finishAt) * 1000).toLocaleString()}`);
-        console.log(`Commission: ${ethers.utils.formatEther(voting.commission)} ETH`);
+
+        // Проверка на существование commission
+        if (voting.commission !== undefined) {
+            console.log(`Commission: ${ethers.formatEther(voting.commission)} ETH`);
+        } else {
+            console.log(`Commission: Not available`);
+        }
+
         console.log(`Deleted At: ${voting.deleted_at > 0 ? new Date(Number(voting.deleted_at) * 1000).toLocaleString() : 'Not deleted'}`);
         console.log(`Options Count: ${voting.optionsCount}`);
 

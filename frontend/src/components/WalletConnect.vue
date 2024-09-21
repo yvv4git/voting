@@ -48,17 +48,16 @@ export default {
         const options = ["Option 1", "Option 2", "Option 3"];
         const commission = 1000000000000000; // 0.001 ETH
 
-        // Получаем текущий nonce для аккаунта
-        const nonce = await this.web3.eth.getTransactionCount(this.accounts[0]);
-        console.log("Current nonce:", nonce);
-
         // Определяем gasLimit автоматически
-        const gasLimit = await this.contract.methods
+        const gasLimitBigInt = await this.contract.methods
           .createVoting(name, finishAt, options, commission)
           .estimateGas({
             from: this.accounts[0],
             value: commission,
           });
+
+        // Преобразуем BigInt в обычное число
+        const gasLimit = Number(gasLimitBigInt);
         console.log("Gas limit:", gasLimit);
 
         // Вызываем функцию контракта
@@ -69,7 +68,6 @@ export default {
             value: commission, // Если функция payable, передаем значение
             gasPrice: Web3.utils.toWei("1", "gwei"), // Укажите цену газа
             gasLimit: gasLimit, // Укажите лимит газа
-            nonce: nonce, // Укажите текущий nonce
           });
 
         console.log("Voting created successfully");
