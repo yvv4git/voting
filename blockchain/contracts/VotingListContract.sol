@@ -123,4 +123,19 @@ contract VotingList {
         }
         return votes;
     }
+
+    // Method for getting option by ID
+    function getOption(uint256 _votingId, uint256 _optionId) public view returns (Option memory) {
+        Voting storage voting = votings[_votingId];
+        require(
+            voting.deleted_at == 0,
+            "Voting has been deleted"
+        );
+        require(
+            _optionId < voting.optionsCount,
+            "Option ID out of range"
+        );
+
+        return voting.options[_optionId];
+    }
 }
