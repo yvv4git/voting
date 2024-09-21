@@ -4,6 +4,7 @@
     <button @click="createVoting">Create Voting</button>
     <button @click="voteInVoting">Vote in Voting</button>
     <button @click="deleteVoting">Delete Voting</button>
+    <button @click="getAllVotings">Get all votings</button>
   </div>
 </template>
 
@@ -155,6 +156,36 @@ export default {
         console.log("Voting deleted successfully");
       } catch (error) {
         console.error("Error deleting voting:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+    },
+    async getAllVotings() {
+      if (!this.contract) {
+        console.error("Contract is not initialized");
+        return;
+      }
+
+      try {
+        // Получаем список всех голосований
+        const votings = await this.contract.methods.getAllVotings().call();
+
+        // Выводим информацию о каждом голосовании в консоль
+        console.log("List of votings:");
+        for (let i = 0; i < votings.length; i++) {
+          const voting = votings[i];
+          console.log(`Voting ID: ${voting.id}`);
+          console.log(`Name: ${voting.name}`);
+
+          // Явно преобразуем BigInt в число перед умножением
+          const finishAtTimestamp = Number(voting.finishAt) * 1000;
+          console.log(`Finish At: ${new Date(finishAtTimestamp).toLocaleString()}`);
+
+          console.log(`Is Deleted: ${voting.isDeleted}`);
+          console.log("-----------------------------");
+        }
+      } catch (error) {
+        console.error("Error getting all votings:", error);
         console.error("Error details:", error.message);
         console.error("Error stack:", error.stack);
       }

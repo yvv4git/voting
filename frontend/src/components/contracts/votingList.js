@@ -1,7 +1,5 @@
-// votingList.js
-
-// ABI контракта
-const votingListABI = [
+// contract.js
+export const votingListABI = [
     {
       "anonymous": false,
       "inputs": [
@@ -104,6 +102,41 @@ const votingListABI = [
       "name": "deleteVoting",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getAllVotings",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "finishAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isDeleted",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct VotingList.VotingData[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -217,22 +250,7 @@ const votingListABI = [
       ],
       "stateMutability": "view",
       "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "votingsCount",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
     }
-  ];
-  
-  const contractAddress = "0x8464135c8F25Da09e49BC8782676a84730C318bC";
-  
-  export { votingListABI, contractAddress };
+    ];
+    
+    export const contractAddress = "0x8464135c8F25Da09e49BC8782676a84730C318bC";
