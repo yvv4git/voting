@@ -2,6 +2,7 @@
   <div class="wallet-connect">
     <button @click="connectWallet">Connect a wallet</button>
     <button @click="createVoting">Create Voting</button>
+    <button @click="voteInVoting">Vote in Voting</button>
   </div>
 </template>
 
@@ -77,6 +78,46 @@ export default {
         console.error("Error stack:", error.stack);
       }
     },
+    async voteInVoting() {
+      if (!this.contract) {
+        console.error("Contract is not initialized");
+        return;
+      }
+
+      try {
+        const votingId = 0; // Укажите ID голосования
+        const optionId = 1; // Укажите ID варианта
+        const value = Web3.utils.toWei("0.001", "ether"); // Укажите сумму для голосования
+
+        // Определяем gasLimit автоматически
+        const gasLimitBigInt = await this.contract.methods
+          .vote(votingId, optionId)
+          .estimateGas({
+            from: this.accounts[0],
+            value: value,
+          });
+
+        // Преобразуем BigInt в обычное число
+        const gasLimit = Number(gasLimitBigInt);
+        console.log("Gas limit:", gasLimit);
+
+        // Вызываем функцию контракта
+        await this.contract.methods
+          .vote(votingId, optionId)
+          .send({
+            from: this.accounts[0],
+            value: value, // Если функция payable, передаем значение
+            gasPrice: Web3.utils.toWei("1", "gwei"), // Укажите цену газа
+            gasLimit: gasLimit, // Укажите лимит газа
+          });
+
+        console.log("Voted successfully");
+      } catch (error) {
+        console.error("Error voting:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+    },
   },
 };
 </script>
@@ -93,6 +134,7 @@ button {
   color: white;
   border: none;
   border-radius: 4px;
+  margin-right: 10px; /* Добавляем отступ между кнопками */
 }
 button:hover {
   background-color: #3a5168;
