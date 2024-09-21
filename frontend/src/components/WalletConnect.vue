@@ -3,6 +3,7 @@
     <button @click="connectWallet">Connect a wallet</button>
     <button @click="createVoting">Create Voting</button>
     <button @click="voteInVoting">Vote in Voting</button>
+    <button @click="deleteVoting">Delete Voting</button>
   </div>
 </template>
 
@@ -116,6 +117,44 @@ export default {
         console.log("Voted successfully");
       } catch (error) {
         console.error("Error voting:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+    },
+    async deleteVoting() {
+      if (!this.contract) {
+        console.error("Contract is not initialized");
+        return;
+      }
+
+      try {
+        const votingId = 0; // Укажите ID голосования
+
+        // Получаем текущий nonce для аккаунта
+        const nonce = await this.web3.eth.getTransactionCount(this.accounts[0]);
+
+        // Определяем gasLimit автоматически
+        const gasLimitBigInt = await this.contract.methods
+          .deleteVoting(votingId)
+          .estimateGas({
+            from: this.accounts[0],
+          });
+
+        // Преобразуем BigInt в обычное число
+        const gasLimit = Number(gasLimitBigInt);
+        console.log("Gas limit:", gasLimit);
+
+        // Вызываем функцию контракта
+        await this.contract.methods.deleteVoting(votingId).send({
+          from: this.accounts[0],
+          gasPrice: Web3.utils.toWei("1", "gwei"), // Укажите цену газа
+          gasLimit: gasLimit, // Укажите лимит газа
+          nonce: nonce, // Укажите nonce
+        });
+
+        console.log("Voting deleted successfully");
+      } catch (error) {
+        console.error("Error deleting voting:", error);
         console.error("Error details:", error.message);
         console.error("Error stack:", error.stack);
       }
