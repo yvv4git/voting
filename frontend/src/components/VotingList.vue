@@ -1,7 +1,7 @@
 <template>
   <div class="voting-list">
     <ul>
-      <li v-for="voting in votings" :key="voting.id">
+      <li v-for="voting in activeVotings" :key="voting.id">
         <div @click="selectVoting(voting.id)" class="voting-item">
           {{ voting.name }} (Finish: {{ formatDate(voting.finishAt) }})
         </div>
@@ -24,6 +24,11 @@ export default {
       contract: null,
       accounts: [],
     };
+  },
+  computed: {
+    activeVotings() {
+      return this.votings.filter(voting => !voting.isDeleted);
+    },
   },
   methods: {
     async connectWallet() {
