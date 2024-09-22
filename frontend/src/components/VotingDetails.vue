@@ -90,7 +90,7 @@ export default {
   },
   watch: {
     selectedVotingId(newVotingId) {
-      console.log("New voting ID:", newVotingId);
+      console.log("Selected voting ID:", newVotingId);
       if (newVotingId !== null) {
         this.fetchVotingDetails(newVotingId);
       } else {
