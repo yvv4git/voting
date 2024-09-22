@@ -12,7 +12,10 @@
         @delete-voting="onDeleteVoting"
         :votings="votings"
       />
-      <VotingDetails :selectedVotingId="selectedVotingId" @vote-for-option="voteForOption" />
+      <VotingDetails
+        :selectedVotingId="selectedVotingId"
+        @vote-for-option="voteForOption"
+      />
     </div>
     <footer class="app-footer">
       <p>&copy; 2023 Eliseev V.V. All rights reserved.</p>
@@ -30,6 +33,8 @@ import VotingList from "./components/VotingList.vue";
 import VotingDetails from "./components/VotingDetails.vue";
 import WalletConnect from "./components/WalletConnect.vue";
 import AddVotingModal from "./components/AddVotingModal.vue";
+import Web3 from "web3";
+import { votingListABI, contractAddress } from "./components/contracts/votingList";
 
 export default {
   name: "App",
@@ -43,30 +48,102 @@ export default {
     return {
       selectedVotingId: null,
       showModal: false,
-      votings: [
-        {
-          id: 1,
-          title: "Голосование за еду на вечер",
-          options: ["Пицца", "Пирожки", "Торт"],
-          votingEnd: "2023-12-31T23:59:59", // Пример даты окончания голосования
-        },
-        {
-          id: 2,
-          title: "Голосование за фильм на вечер",
-          options: ["Терминатор", "Титаник", "Аватар"],
-          votingEnd: "2023-11-30T23:59:59", // Пример даты окончания голосования
-        },
-      ],
+      votings: [],
+      web3: null,
+      contract: null,
+      accounts: [],
     };
   },
   methods: {
+    async connectWallet() {
+      if (window.ethereum) {
+        try {
+          await window.ethereum.request({ method: "eth_requestAccounts" });
+          this.web3 = new Web3(window.ethereum);
+          this.accounts = await this.web3.eth.getAccounts();
+          console.log("Connected accounts:", this.accounts);
+
+          // Подключаемся к контракту
+          this.contract = new this.web3.eth.Contract(votingListABI, contractAddress);
+
+          // Получаем все голосования
+          await this.fetchAllVotings();
+        } catch (error) {
+          console.error("Error connecting to MetaMask:", error);
+        }
+      } else {
+        console.error("MetaMask is not installed");
+      }
+    },
+    async fetchAllVotings() {
+      if (!this.contract) {
+        console.error("Contract is not initialized");
+        return;
+      }
+
+      try {
+        // Получаем список всех голосований
+        const votings = await this.contract.methods.getAllVotings().call();
+
+        // Преобразуем данные в удобный формат
+        this.votings = votings.map((voting) => ({
+          id: voting.id,
+          title: voting.name,
+          options: voting.options,
+          votingEnd: Number(voting.finishAt) * 1000, // Преобразуем BigInt в число и в миллисекунды
+          isDeleted: voting.isDeleted,
+        }));
+      } catch (error) {
+        console.error("Error fetching all votings:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+    },
     onSelectVoting(votingId) {
       this.selectedVotingId = Number(votingId);
     },
-    onDeleteVoting(votingId) {
-      this.votings = this.votings.filter((voting) => voting.id !== votingId);
-      if (this.selectedVotingId === votingId) {
-        this.selectedVotingId = null;
+    async onDeleteVoting(votingId) {
+      if (!this.contract) {
+        console.error("Contract is not initialized");
+        return;
+      }
+
+      try {
+        // Получаем текущий nonce для аккаунта
+        const nonce = await this.web3.eth.getTransactionCount(this.accounts[0]);
+
+        // Определяем gasLimit автоматически
+        const gasLimitBigInt = await this.contract.methods
+          .deleteVoting(votingId)
+          .estimateGas({
+            from: this.accounts[0],
+          });
+
+        // Преобразуем BigInt в обычное число
+        const gasLimit = Number(gasLimitBigInt);
+        console.log("Gas limit:", gasLimit);
+
+        // Вызываем функцию контракта
+        await this.contract.methods.deleteVoting(votingId).send({
+          from: this.accounts[0],
+          gasPrice: Web3.utils.toWei("1", "gwei"), // Укажите цену газа
+          gasLimit: gasLimit, // Укажите лимит газа
+          nonce: nonce, // Укажите nonce
+        });
+
+        console.log("Voting deleted successfully");
+
+        // Обновляем список голосований
+        await this.fetchAllVotings();
+
+        // Обновляем selectedVotingId, если удаляемое голосование было выбрано
+        if (this.selectedVotingId === votingId) {
+          this.selectedVotingId = null;
+        }
+      } catch (error) {
+        console.error("Error deleting voting:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
       }
     },
     openModal() {
@@ -83,6 +160,9 @@ export default {
       // Логика голосования за вариант
       console.log("Vote for option:", optionIndex, "in voting with ID:", votingId);
     },
+  },
+  mounted() {
+    this.connectWallet();
   },
 };
 </script>
