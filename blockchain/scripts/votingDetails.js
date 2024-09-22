@@ -5,6 +5,9 @@ const { ethers } = require("hardhat");
 async function main() {
     const [user1] = await ethers.getSigners();
 
+    // Вывод адреса кошелька user1
+    console.log(`User1 address: ${user1.address}`);
+
     // Адрес развернутого контракта (замените на реальный адрес)
     const contractAddress = "0x8464135c8F25Da09e49BC8782676a84730C318bC";
 

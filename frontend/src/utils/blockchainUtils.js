@@ -144,7 +144,7 @@ export async function fetchVotingDetails(contract, votingId) {
   try {
     // Получаем детальную информацию о голосовании
     const votingDetails = await contract.methods.getVotingDetails(votingId).call();
-    console.log("Voting Details:", votingDetails);
+    console.log("Raw Voting Details:", votingDetails); // Добавьте это для отладки
 
     // Преобразуем данные в удобный формат
     return {
