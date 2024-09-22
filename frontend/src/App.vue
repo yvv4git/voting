@@ -2,7 +2,6 @@
   <div id="app">
     <header class="app-header">
       <div class="header-buttons">
-        <WalletConnect />
         <button @click="openModal">Add a vote</button>
       </div>
     </header>
@@ -18,7 +17,7 @@
       />
     </div>
     <footer class="app-footer">
-      <p>&copy; 2023 Eliseev V.V. All rights reserved.</p>
+      <p>&copy; 2024 Eliseev V.V. All rights reserved.</p>
     </footer>
     <AddVotingModal
       :showModal="showModal"
@@ -31,7 +30,6 @@
 <script>
 import VotingList from "./components/VotingList.vue";
 import VotingDetails from "./components/VotingDetails.vue";
-import WalletConnect from "./components/WalletConnect.vue";
 import AddVotingModal from "./components/AddVotingModal.vue";
 import { connectWallet, fetchAllVotings, deleteVoting } from "./utils/blockchainUtils";
 
@@ -40,7 +38,6 @@ export default {
   components: {
     VotingList,
     VotingDetails,
-    WalletConnect,
     AddVotingModal,
   },
   data() {
