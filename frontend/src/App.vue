@@ -12,7 +12,7 @@
         @delete-voting="onDeleteVoting"
         :votings="votings"
       />
-      <VotingDetails :selectedVoting="selectedVoting" />
+      <VotingDetails :selectedVotingId="selectedVotingId" @vote-for-option="voteForOption" />
     </div>
     <footer class="app-footer">
       <p>&copy; 2023 Eliseev V.V. All rights reserved.</p>
@@ -41,7 +41,7 @@ export default {
   },
   data() {
     return {
-      selectedVoting: null,
+      selectedVotingId: null,
       showModal: false,
       votings: [
         {
@@ -60,13 +60,13 @@ export default {
     };
   },
   methods: {
-    onSelectVoting(voting) {
-      this.selectedVoting = voting;
+    onSelectVoting(votingId) {
+      this.selectedVotingId = votingId;
     },
     onDeleteVoting(votingId) {
       this.votings = this.votings.filter((voting) => voting.id !== votingId);
-      if (this.selectedVoting && this.selectedVoting.id === votingId) {
-        this.selectedVoting = null;
+      if (this.selectedVotingId === votingId) {
+        this.selectedVotingId = null;
       }
     },
     openModal() {
@@ -78,6 +78,10 @@ export default {
     addVoting(newVoting) {
       const newId = Math.max(...this.votings.map((v) => v.id)) + 1;
       this.votings.push({ id: newId, ...newVoting });
+    },
+    voteForOption(votingId, optionIndex) {
+      // Логика голосования за вариант
+      console.log("Vote for option:", optionIndex, "in voting with ID:", votingId);
     },
   },
 };
