@@ -12,8 +12,7 @@
 </template>
 
 <script>
-import Web3 from "web3";
-import { votingListABI, contractAddress } from "./contracts/votingList";
+import { connectWallet, fetchAllVotings, deleteVoting } from "../utils/blockchainUtils";
 
 export default {
   name: "VotingList",
@@ -32,23 +31,17 @@ export default {
   },
   methods: {
     async connectWallet() {
-      if (window.ethereum) {
-        try {
-          await window.ethereum.request({ method: "eth_requestAccounts" });
-          this.web3 = new Web3(window.ethereum);
-          this.accounts = await this.web3.eth.getAccounts();
-          console.log("Connected accounts:", this.accounts);
+      try {
+        const { web3, contract, accounts } = await connectWallet();
+        this.web3 = web3;
+        this.contract = contract;
+        this.accounts = accounts;
+        console.log("Connected accounts:", this.accounts);
 
-          // Подключаемся к контракту
-          this.contract = new this.web3.eth.Contract(votingListABI, contractAddress);
-
-          // Получаем все голосования
-          await this.fetchAllVotings();
-        } catch (error) {
-          console.error("Error connecting to MetaMask:", error);
-        }
-      } else {
-        console.error("MetaMask is not installed");
+        // Получаем все голосования
+        await this.fetchAllVotings();
+      } catch (error) {
+        console.error("Error connecting to MetaMask:", error);
       }
     },
     async fetchAllVotings() {
@@ -58,16 +51,7 @@ export default {
       }
 
       try {
-        // Получаем список всех голосований
-        const votings = await this.contract.methods.getAllVotings().call();
-
-        // Преобразуем данные в удобный формат
-        this.votings = votings.map(voting => ({
-          id: voting.id,
-          name: voting.name,
-          finishAt: Number(voting.finishAt) * 1000, // Преобразуем BigInt в число и в миллисекунды
-          isDeleted: voting.isDeleted,
-        }));
+        this.votings = await fetchAllVotings(this.contract);
       } catch (error) {
         console.error("Error fetching all votings:", error);
         console.error("Error details:", error.message);
@@ -77,9 +61,17 @@ export default {
     selectVoting(votingId) {
       this.$emit("select-voting", votingId);
     },
-    deleteVoting(votingId) {
+    async deleteVoting(votingId) {
       console.log("Deleting voting with ID:", votingId); // Выводим сообщение в консоль
-      this.$emit("delete-voting", votingId);
+      try {
+        await deleteVoting(this.contract, this.web3, this.accounts, votingId);
+        // Обновляем список голосований после удаления
+        await this.fetchAllVotings();
+      } catch (error) {
+        console.error("Error deleting voting:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
+      }
     },
     formatDate(timestamp) {
       const date = new Date(timestamp);
