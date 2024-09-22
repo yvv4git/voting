@@ -73,6 +73,7 @@ export default {
       this.$emit("select-voting", votingId);
     },
     deleteVoting(votingId) {
+      console.log("Deleting voting with ID:", votingId); // Выводим сообщение в консоль
       this.$emit("delete-voting", votingId);
     },
     formatDate(timestamp) {
