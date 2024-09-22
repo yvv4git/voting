@@ -5,7 +5,7 @@
     <button @click="voteInVoting">Vote in Voting</button>
     <button @click="deleteVoting">Delete Voting</button>
     <button @click="getAllVotings">Get all votings</button>
-    <button @click="getVotesForVoting">Get Votes for Voting</button>
+    <button @click="getVotingDetails">Get voting details</button>
   </div>
 </template>
 
@@ -196,7 +196,7 @@ export default {
         console.error("Error stack:", error.stack);
       }
     },
-    async getVotesForVoting() {
+    async getVotingDetails() {
       if (!this.contract) {
         console.error("Contract is not initialized");
         return;
@@ -205,12 +205,31 @@ export default {
       try {
         const votingId = 0; // Укажите ID голосования
 
-        // Вызываем функцию контракта
-        const votes = await this.contract.methods.getVotes(votingId).call();
+        // Получаем детальную информацию о голосовании
+        const votingDetails = await this.contract.methods.getVotingDetails(votingId).call();
 
-        console.log("Votes for voting:", votes);
+        // Выводим информацию о голосовании в консоль
+        console.log("");
+        console.log("Voting Details:");
+        console.log(`Voting ID: ${votingDetails.id}`);
+        console.log(`Name: ${votingDetails.name}`);
+
+        // Явно преобразуем BigInt в число перед умножением
+        const finishAtTimestamp = Number(votingDetails.finishAt) * 1000;
+        console.log(`Finish At: ${new Date(finishAtTimestamp).toLocaleString()}`);
+
+        console.log(`Is Deleted: ${votingDetails.isDeleted}`);
+
+        console.log("Options:");
+        for (let i = 0; i < votingDetails.options.length; i++) {
+          const option = votingDetails.options[i];
+          console.log(`Option ID: ${i}`);
+          console.log(`Option Name: ${option.name}`);
+          console.log(`Points: ${option.points}`);
+          console.log("-----------------------------");
+        }
       } catch (error) {
-        console.error("Error getting votes for voting:", error);
+        console.error("Error getting voting details:", error);
         console.error("Error details:", error.message);
         console.error("Error stack:", error.stack);
       }

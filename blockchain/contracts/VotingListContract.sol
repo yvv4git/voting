@@ -28,6 +28,15 @@ contract VotingList {
         bool isDeleted; // Status (deleted or not)
     }
 
+    // Structure for returning detailed voting information
+    struct DetailedVoting {
+        uint256 id; // Voting ID
+        string name; // Voting name
+        uint256 finishAt; // Timestamp of voting end
+        bool isDeleted; // Status (deleted or not)
+        Option[] options; // List of options with their details
+    }
+
     // List of votings
     Voting[] public votings;
 
@@ -127,19 +136,26 @@ contract VotingList {
         return votes;
     }
 
-    // Method for getting option by ID
-    function getOption(uint256 _votingId, uint256 _optionId) public view returns (Option memory) {
+    // Method for getting detailed information about a voting
+    function getVotingDetails(uint256 _votingId) public view returns (DetailedVoting memory) {
         Voting storage voting = votings[_votingId];
         require(
             voting.deleted_at == 0,
             "Voting has been deleted"
         );
-        require(
-            _optionId < voting.optionsCount,
-            "Option ID out of range"
-        );
 
-        return voting.options[_optionId];
+        DetailedVoting memory detailedVoting;
+        detailedVoting.id = _votingId;
+        detailedVoting.name = voting.name;
+        detailedVoting.finishAt = voting.finishAt;
+        detailedVoting.isDeleted = voting.deleted_at != 0;
+
+        detailedVoting.options = new Option[](voting.optionsCount);
+        for (uint256 i = 0; i < voting.optionsCount; i++) {
+            detailedVoting.options[i] = voting.options[i];
+        }
+
+        return detailedVoting;
     }
 
     // Method for getting all votings
