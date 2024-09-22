@@ -3,12 +3,6 @@
 pragma solidity ^0.8.0;
 
 contract VotingList {
-    // List of votings
-    mapping(uint256 => Voting) public votings;
-
-    // Number of votings
-    uint256 public votingsCount;
-
     // Voting structure
     struct Voting {
         string name; // Voting name
@@ -25,6 +19,27 @@ contract VotingList {
         string name; // Option name
         uint256 points; // Number of points
     }
+
+    // Structure for returning voting data
+    struct VotingData {
+        uint256 id; // Voting ID
+        string name; // Voting name
+        uint256 finishAt; // Timestamp of voting end
+        bool isDeleted; // Status (deleted or not)
+    }
+
+    // Structure for returning detailed voting information
+    struct DetailedVoting {
+        uint256 id; // Voting ID
+        string name; // Voting name
+        uint256 finishAt; // Timestamp of voting end
+        bool isDeleted; // Status (deleted or not)
+        Option[] options; // List of options with their details
+        bool voted; // Indicates if the current wallet has voted
+    }
+
+    // List of votings
+    Voting[] public votings;
 
     // Events
     event VotingCreated(
@@ -47,7 +62,7 @@ contract VotingList {
             "Insufficient funds to pay the commission"
         );
 
-        Voting storage voting = votings[votingsCount];
+        Voting storage voting = votings.push();
         voting.name = _name;
         voting.finishAt = _finishAt;
         voting.commission = _commission;
@@ -61,9 +76,7 @@ contract VotingList {
             voting.options[i] = option;
         }
 
-        votingsCount++;
-
-        emit VotingCreated(votingsCount - 1, _name, _finishAt);
+        emit VotingCreated(votings.length - 1, _name, _finishAt);
     }
 
     // Method for voting
@@ -122,5 +135,44 @@ contract VotingList {
             votes[i] = voting.options[i].points;
         }
         return votes;
+    }
+
+    // Method for getting detailed information about a voting
+    function getVotingDetails(uint256 _votingId) public view returns (DetailedVoting memory) {
+        Voting storage voting = votings[_votingId];
+        require(
+            voting.deleted_at == 0,
+            "Voting has been deleted"
+        );
+
+        DetailedVoting memory detailedVoting;
+        detailedVoting.id = _votingId;
+        detailedVoting.name = voting.name;
+        detailedVoting.finishAt = voting.finishAt;
+        detailedVoting.isDeleted = voting.deleted_at != 0;
+        detailedVoting.voted = voting.votes[msg.sender] != 0; // Check if the current wallet has voted
+
+        detailedVoting.options = new Option[](voting.optionsCount);
+        for (uint256 i = 0; i < voting.optionsCount; i++) {
+            detailedVoting.options[i] = voting.options[i];
+        }
+
+        return detailedVoting;
+    }
+
+    // Method for getting all votings
+    function getAllVotings() public view returns (VotingData[] memory) {
+        VotingData[] memory votingDataList = new VotingData[](votings.length);
+
+        for (uint256 i = 0; i < votings.length; i++) {
+            votingDataList[i] = VotingData({
+                id: i,
+                name: votings[i].name,
+                finishAt: votings[i].finishAt,
+                isDeleted: votings[i].deleted_at != 0
+            });
+        }
+
+        return votingDataList;
     }
 }

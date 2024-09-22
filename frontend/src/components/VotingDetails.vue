@@ -1,10 +1,12 @@
 <template>
   <div class="voting-details" v-if="selectedVoting">
-    <h2>{{ selectedVoting.title }}</h2>
+    <h2>{{ selectedVoting.name }}</h2>
+    <p>Finish At: {{ formatDate(selectedVoting.finishAt) }}</p>
+    <p>Is Deleted: {{ selectedVoting.isDeleted ? 'Yes' : 'No' }}</p>
     <ul>
       <li v-for="(option, index) in selectedVoting.options" :key="index">
-        {{ option }} - {{ votes[index] }} number of votes
-        <button @click="voteForOption(index)">Vote</button>
+        {{ option.name }} - {{ option.points }} number of votes
+        <button @click="voteForOption(index)" v-if="!selectedVoting.voted">Vote</button>
       </li>
     </ul>
   </div>
@@ -14,31 +16,91 @@
 </template>
 
 <script>
+import { connectWallet, fetchVotingDetails, voteForOption } from "../utils/blockchainUtils";
+import Web3 from "web3"; // Импортируем Web3
+
 export default {
   name: "VotingDetails",
   props: {
-    selectedVoting: {
-      type: Object,
+    selectedVotingId: {
+      type: Number,
       required: false,
       default: null,
     },
   },
   data() {
     return {
-      votes: this.selectedVoting ? this.selectedVoting.options.map(() => 0) : [], // Инициализация голосов для каждого варианта
+      selectedVoting: null,
+      web3: null,
+      contract: null,
+      accounts: [],
     };
   },
   methods: {
-    voteForOption(index) {
-      this.$data.votes[index] += 1;
+    async connectWallet() {
+      console.log("Connecting to MetaMask...");
+      try {
+        const { web3, contract, accounts } = await connectWallet();
+        this.web3 = web3;
+        this.contract = contract;
+        this.accounts = accounts;
+      } catch (error) {
+        console.error("Error connecting to MetaMask:", error);
+      }
+    },
+    async fetchVotingDetails(votingId) {
+      if (!this.contract) {
+        console.error("Contract is not initialized");
+        return;
+      }
+
+      try {
+        // Передаем адрес кошелька в функцию fetchVotingDetails
+        this.selectedVoting = await fetchVotingDetails(this.contract, votingId, this.accounts[0]);
+      } catch (error) {
+        console.error("Error fetching voting details:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+    },
+    async voteForOption(index) {
+      if (!this.contract) {
+        console.error("Contract is not initialized");
+        return;
+      }
+
+      try {
+        const votingId = this.selectedVoting.id; 
+        const optionId = index; 
+        const value = Web3.utils.toWei("0.001", "ether"); // Укажите сумму для голосования
+
+        await voteForOption(this.contract, this.web3, this.accounts, votingId, optionId, value);
+
+        // Обновляем детали голосования после голосования
+        await this.fetchVotingDetails(votingId);
+      } catch (error) {
+        console.error("Error voting:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+    },
+    formatDate(timestamp) {
+      const date = new Date(timestamp);
+      return date.toLocaleString();
     },
   },
   watch: {
-    selectedVoting(newVoting) {
-      if (newVoting) {
-        this.votes = newVoting.options.map(() => 0);
+    selectedVotingId(newVotingId) {
+      console.log("Selected voting ID:", newVotingId);
+      if (newVotingId !== null) {
+        this.fetchVotingDetails(newVotingId);
+      } else {
+        this.selectedVoting = null;
       }
     },
+  },
+  mounted() {
+    this.connectWallet();
   },
 };
 </script>

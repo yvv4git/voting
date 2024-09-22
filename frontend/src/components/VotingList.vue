@@ -1,9 +1,9 @@
 <template>
   <div class="voting-list">
     <ul>
-      <li v-for="voting in votings" :key="voting.id">
-        <div @click="selectVoting(voting)" class="voting-item">
-          {{ voting.title }} (Finish: {{ formatDate(voting.votingEnd) }})
+      <li v-for="voting in activeVotings" :key="voting.id">
+        <div @click="selectVoting(voting.id)" class="voting-item">
+          {{ voting.name }} (Finish: {{ formatDate(voting.finishAt) }})
         </div>
         <button @click="deleteVoting(voting.id)" class="delete-button">Delete</button>
       </li>
@@ -12,6 +12,8 @@
 </template>
 
 <script>
+import { deleteVoting } from "../utils/blockchainUtils";
+
 export default {
   name: "VotingList",
   props: {
@@ -20,15 +22,31 @@ export default {
       required: true,
     },
   },
+  computed: {
+    activeVotings() {
+      return this.votings.filter(voting => !voting.isDeleted);
+    },
+  },
   methods: {
-    selectVoting(voting) {
-      this.$emit("select-voting", voting);
+    selectVoting(votingId) {
+      console.log("Selected voting with ID (before conversion):", votingId);
+      console.log("Selected voting with ID (after conversion):", Number(votingId));
+      this.$emit("select-voting", votingId);
     },
-    deleteVoting(votingId) {
-      this.$emit("delete-voting", votingId);
+    async deleteVoting(votingId) {
+      console.log("Deleting voting with ID:", votingId); // Выводим сообщение в консоль
+      try {
+        await deleteVoting(this.contract, this.web3, this.accounts, votingId);
+        // Обновляем список голосований после удаления
+        await this.fetchAllVotings();
+      } catch (error) {
+        console.error("Error deleting voting:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
+      }
     },
-    formatDate(dateString) {
-      const date = new Date(dateString);
+    formatDate(timestamp) {
+      const date = new Date(timestamp);
       return date.toLocaleString();
     },
   },

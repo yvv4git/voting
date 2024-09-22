@@ -1,10 +1,12 @@
 const { ethers } = require("hardhat");
 
+// Run:
+// npx hardhat run --network localHardhat scripts/vote.js
 async function main() {
     const [user1] = await ethers.getSigners();
 
     // Адрес развернутого контракта (замените на реальный адрес)
-    const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+    const contractAddress = "0x8464135c8F25Da09e49BC8782676a84730C318bC";
 
     // Подключение к уже развернутому контракту
     const VotingList = await ethers.getContractFactory("VotingList");

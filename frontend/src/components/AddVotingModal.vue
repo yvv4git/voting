@@ -1,7 +1,7 @@
 <template>
   <div class="modal-overlay" v-if="showModal" @click="closeModal">
     <div class="modal-content" @click.stop>
-      <h2>Add a new voteе</h2>
+      <h2>Add a new vote</h2>
       <form @submit.prevent="addVoting">
         <div class="form-group">
           <label for="title">The name of the vote:</label>
@@ -33,6 +33,8 @@
 </template>
 
 <script>
+import { connectWallet, createVoting } from "../utils/blockchainUtils";
+
 export default {
   name: "AddVotingModal",
   props: {
@@ -45,22 +47,58 @@ export default {
     return {
       newVoting: {
         title: "",
-        options: ["", ""], // Начальные два варианта
+        options: ["", "", ""], // Начальные три варианта
         votingEnd: "", // Поле для даты и времени окончания голосования
       },
+      web3: null,
+      contract: null,
+      accounts: [],
     };
   },
   methods: {
+    async connectWallet() {
+      try {
+        const { web3, contract, accounts } = await connectWallet();
+        this.web3 = web3;
+        this.contract = contract;
+        this.accounts = accounts;
+      } catch (error) {
+        console.error("Error connecting to MetaMask:", error);
+      }
+    },
     addOption() {
       this.newVoting.options.push("");
     },
-    addVoting() {
-      this.$emit("add-voting", { ...this.newVoting });
-      this.closeModal();
+    async addVoting() {
+      if (!this.contract) {
+        console.error("Contract is not initialized");
+        return;
+      }
+
+      try {
+        const votingData = {
+          title: this.newVoting.title,
+          options: this.newVoting.options,
+          votingEnd: this.newVoting.votingEnd,
+          commission: 1000000000000000, // 0.001 ETH
+        };
+
+        await createVoting(this.contract, this.web3, this.accounts, votingData);
+
+        this.closeModal();
+        this.$emit("voting-created"); // Уведомляем родительский компонент о создании голосования
+      } catch (error) {
+        console.error("Error creating voting:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
+      }
     },
     closeModal() {
       this.$emit("close-modal");
     },
+  },
+  mounted() {
+    this.connectWallet();
   },
 };
 </script>

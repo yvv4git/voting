@@ -1,5 +1,5 @@
 up_blockchain:
-	docker compose up ganache
+	docker compose up -d ganache
 
 down_blockchain:
 	docker compose down
@@ -20,16 +20,22 @@ hardhat_node:
 	npx hardhat node
 
 hardhat_scripts_deploy:
-	npx hardhat run --network localhost scripts/deploy.js
+	npx hardhat run --network localHardhat scripts/deploy.js
+
+hardhat_scripts_deploy_ganache:
+	npx hardhat run --network localGanache scripts/deploy.js
 
 hardhat_scripts_create_voting:
-	npx hardhat run --network localhost scripts/createVoting.js
+	npx hardhat run --network localHardhat scripts/createVoting.js
 
 hardhat_scripts_vote:
-	npx hardhat run --network localhost scripts/vote.js
+	npx hardhat run --network localHardhat scripts/vote.js
 
 hardhat_scripts_delete_voting:
-	npx hardhat run --network localhost scripts/deleteVoting.js
+	npx hardhat run --network localHardhat scripts/deleteVoting.js
+
+hardhat_scripts_list:
+	npx hardhat run --network localHardhat scripts/voteList.js
 
 hardhat_test:
 	npx hardhat test

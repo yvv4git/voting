@@ -2,7 +2,6 @@
   <div id="app">
     <header class="app-header">
       <div class="header-buttons">
-        <WalletConnect />
         <button @click="openModal">Add a vote</button>
       </div>
     </header>
@@ -12,15 +11,18 @@
         @delete-voting="onDeleteVoting"
         :votings="votings"
       />
-      <VotingDetails :selectedVoting="selectedVoting" />
+      <VotingDetails
+        :selectedVotingId="selectedVotingId"
+        @vote-for-option="voteForOption"
+      />
     </div>
     <footer class="app-footer">
-      <p>&copy; 2023 Eliseev V.V. All rights reserved.</p>
+      <p>&copy; 2024 Eliseev V.V. All rights reserved.</p>
     </footer>
     <AddVotingModal
       :showModal="showModal"
       @close-modal="closeModal"
-      @add-voting="addVoting"
+      @voting-created="fetchAllVotings"
     />
   </div>
 </template>
@@ -28,45 +30,75 @@
 <script>
 import VotingList from "./components/VotingList.vue";
 import VotingDetails from "./components/VotingDetails.vue";
-import WalletConnect from "./components/WalletConnect.vue";
 import AddVotingModal from "./components/AddVotingModal.vue";
+import { connectWallet, fetchAllVotings, deleteVoting } from "./utils/blockchainUtils";
 
 export default {
   name: "App",
   components: {
     VotingList,
     VotingDetails,
-    WalletConnect,
     AddVotingModal,
   },
   data() {
     return {
-      selectedVoting: null,
+      selectedVotingId: null,
       showModal: false,
-      votings: [
-        {
-          id: 1,
-          title: "Голосование за еду на вечер",
-          options: ["Пицца", "Пирожки", "Торт"],
-          votingEnd: "2023-12-31T23:59:59", // Пример даты окончания голосования
-        },
-        {
-          id: 2,
-          title: "Голосование за фильм на вечер",
-          options: ["Терминатор", "Титаник", "Аватар"],
-          votingEnd: "2023-11-30T23:59:59", // Пример даты окончания голосования
-        },
-      ],
+      votings: [],
+      web3: null,
+      contract: null,
+      accounts: [],
     };
   },
   methods: {
-    onSelectVoting(voting) {
-      this.selectedVoting = voting;
+    resetState() {
+      // Сбрасываем все данные до их начальных значений
+      this.selectedVotingId = null;
+      this.showModal = false;
+      this.votings = [];
+      this.web3 = null;
+      this.contract = null;
+      this.accounts = [];
     },
-    onDeleteVoting(votingId) {
-      this.votings = this.votings.filter((voting) => voting.id !== votingId);
-      if (this.selectedVoting && this.selectedVoting.id === votingId) {
-        this.selectedVoting = null;
+    async connectWallet() {
+      try {
+        const { web3, contract, accounts } = await connectWallet();
+        this.web3 = web3;
+        this.contract = contract;
+        this.accounts = accounts;
+        await this.fetchAllVotings();
+      } catch (error) {
+        console.error("Error connecting to wallet:", error);
+      }
+    },
+    async fetchAllVotings() {
+      try {
+        this.votings = await fetchAllVotings(this.contract);
+        console.log("Votings:", this.votings);
+      } catch (error) {
+        console.error("Error fetching votings:", error);
+      }
+    },
+    onSelectVoting(votingId) {
+      console.log("Received voting ID in App:", votingId);
+      this.selectedVotingId = Number(votingId);
+    },
+    async onDeleteVoting(votingId) {
+      try {
+        await deleteVoting(this.contract, this.web3, this.accounts, votingId);
+        console.log("Voting deleted successfully");
+
+        // Обновляем список голосований
+        await this.fetchAllVotings();
+
+        // Обновляем selectedVotingId, если удаляемое голосование было выбрано
+        if (this.selectedVotingId === votingId) {
+          this.selectedVotingId = null;
+        }
+      } catch (error) {
+        console.error("Error deleting voting:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
       }
     },
     openModal() {
@@ -75,10 +107,14 @@ export default {
     closeModal() {
       this.showModal = false;
     },
-    addVoting(newVoting) {
-      const newId = Math.max(...this.votings.map((v) => v.id)) + 1;
-      this.votings.push({ id: newId, ...newVoting });
+    voteForOption(votingId, optionIndex) {
+      // Логика голосования за вариант
+      console.log("Vote for option:", optionIndex, "in voting with ID:", votingId);
     },
+  },
+  created() {
+    this.resetState(); // Сбрасываем состояние при создании компонента
+    this.connectWallet();
   },
 };
 </script>
