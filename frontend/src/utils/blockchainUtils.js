@@ -134,3 +134,74 @@ export async function deleteVoting(contract, web3, accounts, votingId) {
     throw error;
   }
 }
+
+export async function fetchVotingDetails(contract, votingId) {
+  if (!contract) {
+    console.error("Contract is not initialized");
+    return null;
+  }
+
+  try {
+    // Получаем детальную информацию о голосовании
+    const votingDetails = await contract.methods.getVotingDetails(votingId).call();
+    console.log("Voting Details:", votingDetails);
+
+    // Преобразуем данные в удобный формат
+    return {
+      id: votingDetails.id,
+      name: votingDetails.name,
+      finishAt: Number(votingDetails.finishAt) * 1000, // Преобразуем BigInt в число и в миллисекунды
+      isDeleted: votingDetails.isDeleted,
+      options: votingDetails.options.map(option => ({
+        name: option.name,
+        points: option.points,
+      })),
+      voted: votingDetails.voted, // Добавляем флаг voted
+    };
+  } catch (error) {
+    console.error("Error fetching voting details:", error);
+    console.error("Error details:", error.message);
+    console.error("Error stack:", error.stack);
+    throw error;
+  }
+}
+
+export async function voteForOption(contract, web3, accounts, votingId, optionId, value) {
+  if (!contract) {
+    console.error("Contract is not initialized");
+    return;
+  }
+
+  try {
+    // Получаем текущий nonce для аккаунта
+    const nonce = await web3.eth.getTransactionCount(accounts[0]);
+
+    // Определяем gasLimit автоматически
+    const gasLimitBigInt = await contract.methods
+      .vote(votingId, optionId)
+      .estimateGas({
+        from: accounts[0],
+        value: value,
+      });
+
+    // Преобразуем BigInt в обычное число
+    const gasLimit = Number(gasLimitBigInt);
+    console.log("Gas limit:", gasLimit);
+
+    // Вызываем функцию контракта
+    await contract.methods.vote(votingId, optionId).send({
+      from: accounts[0],
+      value: value, // Если функция payable, передаем значение
+      gasPrice: Web3.utils.toWei("1", "gwei"), // Укажите цену газа
+      gasLimit: gasLimit, // Укажите лимит газа
+      nonce: nonce, // Укажите nonce
+    });
+
+    console.log("Voted successfully");
+  } catch (error) {
+    console.error("Error voting:", error);
+    console.error("Error details:", error.message);
+    console.error("Error stack:", error.stack);
+    throw error;
+  }
+}

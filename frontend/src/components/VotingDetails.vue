@@ -16,8 +16,8 @@
 </template>
 
 <script>
-import Web3 from "web3";
-import { votingListABI, contractAddress } from "./contracts/votingList";
+import { connectWallet, fetchVotingDetails, voteForOption } from "../utils/blockchainUtils";
+import Web3 from "web3"; // Импортируем Web3
 
 export default {
   name: "VotingDetails",
@@ -39,20 +39,13 @@ export default {
   methods: {
     async connectWallet() {
       console.log("Connecting to MetaMask...");
-      if (window.ethereum) {
-        try {
-          await window.ethereum.request({ method: "eth_requestAccounts" });
-          this.web3 = new Web3(window.ethereum);
-          this.accounts = await this.web3.eth.getAccounts();
-          console.log("Connected accounts:", this.accounts);
-
-          // Подключаемся к контракту
-          this.contract = new this.web3.eth.Contract(votingListABI, contractAddress);
-        } catch (error) {
-          console.error("Error connecting to MetaMask:", error);
-        }
-      } else {
-        console.error("MetaMask is not installed");
+      try {
+        const { web3, contract, accounts } = await connectWallet();
+        this.web3 = web3;
+        this.contract = contract;
+        this.accounts = accounts;
+      } catch (error) {
+        console.error("Error connecting to MetaMask:", error);
       }
     },
     async fetchVotingDetails(votingId) {
@@ -62,22 +55,7 @@ export default {
       }
 
       try {
-        // Получаем детальную информацию о голосовании
-        const votingDetails = await this.contract.methods.getVotingDetails(votingId).call();
-        console.log("Voting Details:", votingDetails);
-
-        // Преобразуем данные в удобный формат
-        this.selectedVoting = {
-          id: votingDetails.id,
-          name: votingDetails.name,
-          finishAt: Number(votingDetails.finishAt) * 1000, // Преобразуем BigInt в число и в миллисекунды
-          isDeleted: votingDetails.isDeleted,
-          options: votingDetails.options.map(option => ({
-            name: option.name,
-            points: option.points,
-          })),
-          voted: votingDetails.voted, // Добавляем флаг voted
-        };
+        this.selectedVoting = await fetchVotingDetails(this.contract, votingId);
       } catch (error) {
         console.error("Error fetching voting details:", error);
         console.error("Error details:", error.message);
@@ -95,31 +73,7 @@ export default {
         const optionId = index; 
         const value = Web3.utils.toWei("0.001", "ether"); // Укажите сумму для голосования
 
-        // Получаем текущий nonce для аккаунта
-        const nonce = await this.web3.eth.getTransactionCount(this.accounts[0]);
-
-        // Определяем gasLimit автоматически
-        const gasLimitBigInt = await this.contract.methods
-          .vote(votingId, optionId)
-          .estimateGas({
-            from: this.accounts[0],
-            value: value,
-          });
-
-        // Преобразуем BigInt в обычное число
-        const gasLimit = Number(gasLimitBigInt);
-        console.log("Gas limit:", gasLimit);
-
-        // Вызываем функцию контракта
-        await this.contract.methods.vote(votingId, optionId).send({
-          from: this.accounts[0],
-          value: value, // Если функция payable, передаем значение
-          gasPrice: Web3.utils.toWei("1", "gwei"), // Укажите цену газа
-          gasLimit: gasLimit, // Укажите лимит газа
-          nonce: nonce, // Укажите nonce
-        });
-
-        console.log("Voted successfully");
+        await voteForOption(this.contract, this.web3, this.accounts, votingId, optionId, value);
 
         // Обновляем детали голосования после голосования
         await this.fetchVotingDetails(votingId);
