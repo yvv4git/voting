@@ -33,8 +33,7 @@ import VotingList from "./components/VotingList.vue";
 import VotingDetails from "./components/VotingDetails.vue";
 import WalletConnect from "./components/WalletConnect.vue";
 import AddVotingModal from "./components/AddVotingModal.vue";
-import Web3 from "web3";
-import { votingListABI, contractAddress } from "./components/contracts/votingList";
+import { connectWallet, fetchAllVotings, deleteVoting } from "./utils/blockchainUtils";
 
 export default {
   name: "App",
@@ -55,82 +54,39 @@ export default {
     };
   },
   methods: {
+    resetState() {
+      // Сбрасываем все данные до их начальных значений
+      this.selectedVotingId = null;
+      this.showModal = false;
+      this.votings = [];
+      this.web3 = null;
+      this.contract = null;
+      this.accounts = [];
+    },
     async connectWallet() {
-      if (window.ethereum) {
-        try {
-          await window.ethereum.request({ method: "eth_requestAccounts" });
-          this.web3 = new Web3(window.ethereum);
-          this.accounts = await this.web3.eth.getAccounts();
-          console.log("Connected accounts:", this.accounts);
-
-          // Подключаемся к контракту
-          this.contract = new this.web3.eth.Contract(votingListABI, contractAddress);
-
-          // Получаем все голосования
-          await this.fetchAllVotings();
-        } catch (error) {
-          console.error("Error connecting to MetaMask:", error);
-        }
-      } else {
-        console.error("MetaMask is not installed");
+      try {
+        const { web3, contract, accounts } = await connectWallet();
+        this.web3 = web3;
+        this.contract = contract;
+        this.accounts = accounts;
+        await this.fetchAllVotings();
+      } catch (error) {
+        console.error("Error connecting to wallet:", error);
       }
     },
     async fetchAllVotings() {
-      if (!this.contract) {
-        console.error("Contract is not initialized");
-        return;
-      }
-
       try {
-        // Получаем список всех голосований
-        const votings = await this.contract.methods.getAllVotings().call();
-
-        // Преобразуем данные в удобный формат
-        this.votings = votings.map((voting) => ({
-          id: voting.id,
-          title: voting.name,
-          options: voting.options,
-          votingEnd: Number(voting.finishAt) * 1000, // Преобразуем BigInt в число и в миллисекунды
-          isDeleted: voting.isDeleted,
-        }));
+        this.votings = await fetchAllVotings(this.contract);
       } catch (error) {
-        console.error("Error fetching all votings:", error);
-        console.error("Error details:", error.message);
-        console.error("Error stack:", error.stack);
+        console.error("Error fetching votings:", error);
       }
     },
     onSelectVoting(votingId) {
       this.selectedVotingId = Number(votingId);
     },
     async onDeleteVoting(votingId) {
-      if (!this.contract) {
-        console.error("Contract is not initialized");
-        return;
-      }
-
       try {
-        // Получаем текущий nonce для аккаунта
-        const nonce = await this.web3.eth.getTransactionCount(this.accounts[0]);
-
-        // Определяем gasLimit автоматически
-        const gasLimitBigInt = await this.contract.methods
-          .deleteVoting(votingId)
-          .estimateGas({
-            from: this.accounts[0],
-          });
-
-        // Преобразуем BigInt в обычное число
-        const gasLimit = Number(gasLimitBigInt);
-        console.log("Gas limit:", gasLimit);
-
-        // Вызываем функцию контракта
-        await this.contract.methods.deleteVoting(votingId).send({
-          from: this.accounts[0],
-          gasPrice: Web3.utils.toWei("1", "gwei"), // Укажите цену газа
-          gasLimit: gasLimit, // Укажите лимит газа
-          nonce: nonce, // Укажите nonce
-        });
-
+        await deleteVoting(this.contract, this.web3, this.accounts, votingId);
         console.log("Voting deleted successfully");
 
         // Обновляем список голосований
@@ -158,6 +114,7 @@ export default {
     },
   },
   created() {
+    this.resetState(); // Сбрасываем состояние при создании компонента
     this.connectWallet();
   },
 };
