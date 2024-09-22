@@ -55,7 +55,8 @@ export default {
       }
 
       try {
-        this.selectedVoting = await fetchVotingDetails(this.contract, votingId);
+        // Передаем адрес кошелька в функцию fetchVotingDetails
+        this.selectedVoting = await fetchVotingDetails(this.contract, votingId, this.accounts[0]);
       } catch (error) {
         console.error("Error fetching voting details:", error);
         console.error("Error details:", error.message);

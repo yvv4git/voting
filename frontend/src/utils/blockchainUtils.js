@@ -135,15 +135,15 @@ export async function deleteVoting(contract, web3, accounts, votingId) {
   }
 }
 
-export async function fetchVotingDetails(contract, votingId) {
+export async function fetchVotingDetails(contract, votingId, fromAddress) {
   if (!contract) {
     console.error("Contract is not initialized");
     return null;
   }
 
   try {
-    // Получаем детальную информацию о голосовании
-    const votingDetails = await contract.methods.getVotingDetails(votingId).call();
+    // Получаем детальную информацию о голосовании с указанием адреса кошелька
+    const votingDetails = await contract.methods.getVotingDetails(votingId).call({ from: fromAddress });
     console.log("Raw Voting Details:", votingDetails); // Добавьте это для отладки
 
     // Преобразуем данные в удобный формат
