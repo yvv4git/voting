@@ -82,8 +82,50 @@ export default {
         console.error("Error stack:", error.stack);
       }
     },
-    voteForOption(index) {
-      this.$emit("vote-for-option", this.selectedVoting.id, index);
+    async voteForOption(index) {
+      if (!this.contract) {
+        console.error("Contract is not initialized");
+        return;
+      }
+
+      try {
+        const votingId = this.selectedVoting.id; 
+        const optionId = index; 
+        const value = Web3.utils.toWei("0.001", "ether"); // Укажите сумму для голосования
+
+        // Получаем текущий nonce для аккаунта
+        const nonce = await this.web3.eth.getTransactionCount(this.accounts[0]);
+
+        // Определяем gasLimit автоматически
+        const gasLimitBigInt = await this.contract.methods
+          .vote(votingId, optionId)
+          .estimateGas({
+            from: this.accounts[0],
+            value: value,
+          });
+
+        // Преобразуем BigInt в обычное число
+        const gasLimit = Number(gasLimitBigInt);
+        console.log("Gas limit:", gasLimit);
+
+        // Вызываем функцию контракта
+        await this.contract.methods.vote(votingId, optionId).send({
+          from: this.accounts[0],
+          value: value, // Если функция payable, передаем значение
+          gasPrice: Web3.utils.toWei("1", "gwei"), // Укажите цену газа
+          gasLimit: gasLimit, // Укажите лимит газа
+          nonce: nonce, // Укажите nonce
+        });
+
+        console.log("Voted successfully");
+
+        // Обновляем детали голосования после голосования
+        await this.fetchVotingDetails(votingId);
+      } catch (error) {
+        console.error("Error voting:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
+      }
     },
     formatDate(timestamp) {
       const date = new Date(timestamp);
