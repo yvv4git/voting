@@ -81,6 +81,7 @@ export async function fetchAllVotings(contract) {
   try {
     // Получаем список всех голосований
     const votings = await contract.methods.getAllVotings().call();
+    console.log("Votings from contract:", votings);
 
     // Преобразуем данные в удобный формат
     return votings.map(voting => ({
