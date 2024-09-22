@@ -3,7 +3,7 @@
     <ul>
       <li v-for="voting in votings" :key="voting.id">
         <div @click="selectVoting(voting)" class="voting-item">
-          {{ voting.title }} (Finish: {{ formatDate(voting.votingEnd) }})
+          {{ voting.name }} (Finish: {{ formatDate(voting.finishAt) }})
         </div>
         <button @click="deleteVoting(voting.id)" class="delete-button">Delete</button>
       </li>
@@ -12,25 +12,76 @@
 </template>
 
 <script>
+import Web3 from "web3";
+import { votingListABI, contractAddress } from "./contracts/votingList";
+
 export default {
   name: "VotingList",
-  props: {
-    votings: {
-      type: Array,
-      required: true,
-    },
+  data() {
+    return {
+      votings: [],
+      web3: null,
+      contract: null,
+      accounts: [],
+    };
   },
   methods: {
+    async connectWallet() {
+      if (window.ethereum) {
+        try {
+          await window.ethereum.request({ method: "eth_requestAccounts" });
+          this.web3 = new Web3(window.ethereum);
+          this.accounts = await this.web3.eth.getAccounts();
+          console.log("Connected accounts:", this.accounts);
+
+          // Подключаемся к контракту
+          this.contract = new this.web3.eth.Contract(votingListABI, contractAddress);
+
+          // Получаем все голосования
+          await this.fetchAllVotings();
+        } catch (error) {
+          console.error("Error connecting to MetaMask:", error);
+        }
+      } else {
+        console.error("MetaMask is not installed");
+      }
+    },
+    async fetchAllVotings() {
+      if (!this.contract) {
+        console.error("Contract is not initialized");
+        return;
+      }
+
+      try {
+        // Получаем список всех голосований
+        const votings = await this.contract.methods.getAllVotings().call();
+
+        // Преобразуем данные в удобный формат
+        this.votings = votings.map(voting => ({
+          id: voting.id,
+          name: voting.name,
+          finishAt: Number(voting.finishAt) * 1000, // Преобразуем BigInt в число и в миллисекунды
+          isDeleted: voting.isDeleted,
+        }));
+      } catch (error) {
+        console.error("Error fetching all votings:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+    },
     selectVoting(voting) {
       this.$emit("select-voting", voting);
     },
     deleteVoting(votingId) {
       this.$emit("delete-voting", votingId);
     },
-    formatDate(dateString) {
-      const date = new Date(dateString);
+    formatDate(timestamp) {
+      const date = new Date(timestamp);
       return date.toLocaleString();
     },
+  },
+  mounted() {
+    this.connectWallet();
   },
 };
 </script>
