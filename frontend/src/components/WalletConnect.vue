@@ -5,6 +5,7 @@
     <button @click="voteInVoting">Vote in Voting</button>
     <button @click="deleteVoting">Delete Voting</button>
     <button @click="getAllVotings">Get all votings</button>
+    <button @click="getVotesForVoting">Get Votes for Voting</button>
   </div>
 </template>
 
@@ -191,6 +192,25 @@ export default {
         }
       } catch (error) {
         console.error("Error getting all votings:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+    },
+    async getVotesForVoting() {
+      if (!this.contract) {
+        console.error("Contract is not initialized");
+        return;
+      }
+
+      try {
+        const votingId = 0; // Укажите ID голосования
+
+        // Вызываем функцию контракта
+        const votes = await this.contract.methods.getVotes(votingId).call();
+
+        console.log("Votes for voting:", votes);
+      } catch (error) {
+        console.error("Error getting votes for voting:", error);
         console.error("Error details:", error.message);
         console.error("Error stack:", error.stack);
       }
