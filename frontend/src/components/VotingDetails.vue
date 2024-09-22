@@ -1,9 +1,11 @@
 <template>
   <div class="voting-details" v-if="selectedVoting">
-    <h2>{{ selectedVoting.title }}</h2>
+    <h2>{{ selectedVoting.name }}</h2>
+    <p>Finish At: {{ formatDate(selectedVoting.finishAt) }}</p>
+    <p>Is Deleted: {{ selectedVoting.isDeleted ? 'Yes' : 'No' }}</p>
     <ul>
       <li v-for="(option, index) in selectedVoting.options" :key="index">
-        {{ option }} - {{ votes[index] }} number of votes
+        {{ option.name }} - {{ option.points }} number of votes
         <button @click="voteForOption(index)">Vote</button>
       </li>
     </ul>
@@ -14,31 +16,93 @@
 </template>
 
 <script>
+import Web3 from "web3";
+import { votingListABI, contractAddress } from "./contracts/votingList";
+
 export default {
   name: "VotingDetails",
   props: {
-    selectedVoting: {
-      type: Object,
+    selectedVotingId: {
+      type: Number,
       required: false,
       default: null,
     },
   },
   data() {
     return {
-      votes: this.selectedVoting ? this.selectedVoting.options.map(() => 0) : [], // Инициализация голосов для каждого варианта
+      selectedVoting: null,
+      web3: null,
+      contract: null,
+      accounts: [],
     };
   },
   methods: {
+    async connectWallet() {
+      console.log("Connecting to MetaMask...");
+      if (window.ethereum) {
+        try {
+          await window.ethereum.request({ method: "eth_requestAccounts" });
+          this.web3 = new Web3(window.ethereum);
+          this.accounts = await this.web3.eth.getAccounts();
+          console.log("Connected accounts:", this.accounts);
+
+          // Подключаемся к контракту
+          this.contract = new this.web3.eth.Contract(votingListABI, contractAddress);
+        } catch (error) {
+          console.error("Error connecting to MetaMask:", error);
+        }
+      } else {
+        console.error("MetaMask is not installed");
+      }
+    },
+    async fetchVotingDetails(votingId) {
+      console.log("Fetching voting details for voting ID:", votingId);
+      if (!this.contract) {
+        console.error("Contract is not initialized");
+        return;
+      }
+
+      try {
+        // Получаем детальную информацию о голосовании
+        const votingDetails = await this.contract.methods.getVotingDetails(votingId).call();
+
+        // Преобразуем данные в удобный формат
+        this.selectedVoting = {
+          id: votingDetails.id,
+          name: votingDetails.name,
+          finishAt: Number(votingDetails.finishAt) * 1000, // Преобразуем BigInt в число и в миллисекунды
+          isDeleted: votingDetails.isDeleted,
+          options: votingDetails.options.map(option => ({
+            name: option.name,
+            points: option.points,
+          })),
+        };
+      } catch (error) {
+        console.error("Error fetching voting details:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+    },
     voteForOption(index) {
-      this.$data.votes[index] += 1;
+      this.$emit("vote-for-option", this.selectedVoting.id, index);
+    },
+    formatDate(timestamp) {
+      const date = new Date(timestamp);
+      return date.toLocaleString();
     },
   },
   watch: {
-    selectedVoting(newVoting) {
-      if (newVoting) {
-        this.votes = newVoting.options.map(() => 0);
+    selectedVotingId(newVotingId) {
+      console.log("New voting ID:", newVotingId);
+      if (newVotingId !== null) {
+        this.fetchVotingDetails(newVotingId);
+      } else {
+        this.selectedVoting = null;
       }
     },
+  },
+  mounted() {
+    this.connectWallet();
   },
 };
 </script>

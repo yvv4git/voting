@@ -2,7 +2,7 @@
   <div class="voting-list">
     <ul>
       <li v-for="voting in votings" :key="voting.id">
-        <div @click="selectVoting(voting)" class="voting-item">
+        <div @click="selectVoting(voting.id)" class="voting-item">
           {{ voting.name }} (Finish: {{ formatDate(voting.finishAt) }})
         </div>
         <button @click="deleteVoting(voting.id)" class="delete-button">Delete</button>
@@ -69,8 +69,8 @@ export default {
         console.error("Error stack:", error.stack);
       }
     },
-    selectVoting(voting) {
-      this.$emit("select-voting", voting);
+    selectVoting(votingId) {
+      this.$emit("select-voting", votingId);
     },
     deleteVoting(votingId) {
       this.$emit("delete-voting", votingId);
