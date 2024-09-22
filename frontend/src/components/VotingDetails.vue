@@ -56,7 +56,6 @@ export default {
       }
     },
     async fetchVotingDetails(votingId) {
-      console.log("Fetching voting details for voting ID:", votingId);
       if (!this.contract) {
         console.error("Contract is not initialized");
         return;

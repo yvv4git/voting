@@ -61,7 +61,7 @@ export default {
   },
   methods: {
     onSelectVoting(votingId) {
-      this.selectedVotingId = votingId;
+      this.selectedVotingId = Number(votingId);
     },
     onDeleteVoting(votingId) {
       this.votings = this.votings.filter((voting) => voting.id !== votingId);
