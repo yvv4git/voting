@@ -16,7 +16,7 @@ async function main() {
     const votingId = 0;
 
     // Получение детальной информации о голосовании
-    const votingDetails = await contractVotingList.getVotingDetails(votingId);
+    const votingDetails = await contractVotingList.getVotingDetails(votingId, { from: user1.address });
 
     // Вывод информации о голосовании в консоль
     console.log("");
@@ -29,6 +29,7 @@ async function main() {
     console.log(`Finish At: ${new Date(finishAtTimestamp).toLocaleString()}`);
 
     console.log(`Is Deleted: ${votingDetails.isDeleted}`);
+    console.log(`Voted: ${votingDetails.voted}`); // Вывод значения voted
 
     console.log("");
     console.log("OPTIONS.");

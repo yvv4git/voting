@@ -6,7 +6,7 @@
     <ul>
       <li v-for="(option, index) in selectedVoting.options" :key="index">
         {{ option.name }} - {{ option.points }} number of votes
-        <button @click="voteForOption(index)">Vote</button>
+        <button @click="voteForOption(index)" v-if="!selectedVoting.voted">Vote</button>
       </li>
     </ul>
   </div>
@@ -64,6 +64,7 @@ export default {
       try {
         // Получаем детальную информацию о голосовании
         const votingDetails = await this.contract.methods.getVotingDetails(votingId).call();
+        console.log("Voting Details:", votingDetails);
 
         // Преобразуем данные в удобный формат
         this.selectedVoting = {
@@ -75,6 +76,7 @@ export default {
             name: option.name,
             points: option.points,
           })),
+          voted: votingDetails.voted, // Добавляем флаг voted
         };
       } catch (error) {
         console.error("Error fetching voting details:", error);

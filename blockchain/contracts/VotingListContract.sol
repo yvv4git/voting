@@ -35,6 +35,7 @@ contract VotingList {
         uint256 finishAt; // Timestamp of voting end
         bool isDeleted; // Status (deleted or not)
         Option[] options; // List of options with their details
+        bool voted; // Indicates if the current wallet has voted
     }
 
     // List of votings
@@ -149,6 +150,7 @@ contract VotingList {
         detailedVoting.name = voting.name;
         detailedVoting.finishAt = voting.finishAt;
         detailedVoting.isDeleted = voting.deleted_at != 0;
+        detailedVoting.voted = voting.votes[msg.sender] != 0; // Check if the current wallet has voted
 
         detailedVoting.options = new Option[](voting.optionsCount);
         for (uint256 i = 0; i < voting.optionsCount; i++) {

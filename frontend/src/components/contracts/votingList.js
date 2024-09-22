@@ -206,6 +206,11 @@ export const votingListABI = [
             "internalType": "struct VotingList.Option[]",
             "name": "options",
             "type": "tuple[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "voted",
+            "type": "bool"
           }
         ],
         "internalType": "struct VotingList.DetailedVoting",
