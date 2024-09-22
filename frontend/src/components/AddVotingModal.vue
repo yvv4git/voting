@@ -118,6 +118,7 @@ export default {
 
         console.log("Voting created successfully");
         this.closeModal();
+        this.$emit("voting-created"); // Уведомляем родительский компонент о создании голосования
       } catch (error) {
         console.error("Error creating voting:", error);
         console.error("Error details:", error.message);

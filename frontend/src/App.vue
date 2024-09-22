@@ -23,7 +23,7 @@
     <AddVotingModal
       :showModal="showModal"
       @close-modal="closeModal"
-      @add-voting="addVoting"
+      @voting-created="fetchAllVotings"
     />
   </div>
 </template>
@@ -152,16 +152,12 @@ export default {
     closeModal() {
       this.showModal = false;
     },
-    addVoting(newVoting) {
-      const newId = Math.max(...this.votings.map((v) => v.id)) + 1;
-      this.votings.push({ id: newId, ...newVoting });
-    },
     voteForOption(votingId, optionIndex) {
       // Логика голосования за вариант
       console.log("Vote for option:", optionIndex, "in voting with ID:", votingId);
     },
   },
-  mounted() {
+  created() {
     this.connectWallet();
   },
 };
