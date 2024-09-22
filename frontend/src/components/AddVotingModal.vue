@@ -1,7 +1,7 @@
 <template>
   <div class="modal-overlay" v-if="showModal" @click="closeModal">
     <div class="modal-content" @click.stop>
-      <h2>Add a new voteе</h2>
+      <h2>Add a new vote</h2>
       <form @submit.prevent="addVoting">
         <div class="form-group">
           <label for="title">The name of the vote:</label>
@@ -33,6 +33,9 @@
 </template>
 
 <script>
+import Web3 from "web3";
+import { votingListABI, contractAddress } from "./contracts/votingList";
+
 export default {
   name: "AddVotingModal",
   props: {
@@ -45,22 +48,88 @@ export default {
     return {
       newVoting: {
         title: "",
-        options: ["", ""], // Начальные два варианта
+        options: ["", "", ""], // Начальные три варианта
         votingEnd: "", // Поле для даты и времени окончания голосования
       },
+      web3: null,
+      contract: null,
+      accounts: [],
     };
   },
   methods: {
+    async connectWallet() {
+      if (window.ethereum) {
+        try {
+          await window.ethereum.request({ method: "eth_requestAccounts" });
+          this.web3 = new Web3(window.ethereum);
+          this.accounts = await this.web3.eth.getAccounts();
+          console.log("Connected accounts:", this.accounts);
+
+          // Подключаемся к контракту
+          this.contract = new this.web3.eth.Contract(votingListABI, contractAddress);
+        } catch (error) {
+          console.error("Error connecting to MetaMask:", error);
+        }
+      } else {
+        console.error("MetaMask is not installed");
+      }
+    },
     addOption() {
       this.newVoting.options.push("");
     },
-    addVoting() {
-      this.$emit("add-voting", { ...this.newVoting });
-      this.closeModal();
+    async addVoting() {
+      if (!this.contract) {
+        console.error("Contract is not initialized");
+        return;
+      }
+
+      try {
+        const name = this.newVoting.title;
+        const finishAt = Math.floor(new Date(this.newVoting.votingEnd).getTime() / 1000); // Преобразуем в timestamp
+        const options = this.newVoting.options.filter(option => option.trim() !== ""); // Убираем пустые опции
+        const commission = 1000000000000000; // 0.001 ETH - сколко требовать денег за создание голосования
+
+        // Получаем текущий nonce для аккаунта
+        const nonce = await this.web3.eth.getTransactionCount(this.accounts[0]);
+        console.log("Nonce:", nonce);
+
+        // Определяем gasLimit автоматически
+        const gasLimitBigInt = await this.contract.methods
+          .createVoting(name, finishAt, options, commission)
+          .estimateGas({
+            from: this.accounts[0],
+            value: commission,
+          });
+
+        // Преобразуем BigInt в обычное число
+        const gasLimit = Number(gasLimitBigInt);
+        console.log("Gas limit:", gasLimit);
+
+        // Вызываем функцию контракта
+        await this.contract.methods
+          .createVoting(name, finishAt, options, commission)
+          .send({
+            from: this.accounts[0],
+            value: commission, // Если функция payable, передаем значение
+            gasPrice: Web3.utils.toWei("1", "gwei"), // Укажите цену газа
+            gasLimit: gasLimit, // Укажите лимит газа
+            nonce: nonce, // Укажите nonce
+          });
+
+        console.log("Voting created successfully");
+        this.closeModal();
+      } catch (error) {
+        console.error("Error creating voting:", error);
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
+      }
     },
     closeModal() {
       this.$emit("close-modal");
     },
+  },
+  mounted() {
+    this.connectWallet();
   },
 };
 </script>
