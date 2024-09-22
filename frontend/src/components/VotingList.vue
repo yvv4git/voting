@@ -12,17 +12,15 @@
 </template>
 
 <script>
-import { connectWallet, fetchAllVotings, deleteVoting } from "../utils/blockchainUtils";
+import { deleteVoting } from "../utils/blockchainUtils";
 
 export default {
   name: "VotingList",
-  data() {
-    return {
-      votings: [],
-      web3: null,
-      contract: null,
-      accounts: [],
-    };
+  props: {
+    votings: {
+      type: Array,
+      required: true,
+    },
   },
   computed: {
     activeVotings() {
@@ -30,35 +28,9 @@ export default {
     },
   },
   methods: {
-    async connectWallet() {
-      try {
-        const { web3, contract, accounts } = await connectWallet();
-        this.web3 = web3;
-        this.contract = contract;
-        this.accounts = accounts;
-        console.log("Connected accounts:", this.accounts);
-
-        // Получаем все голосования
-        await this.fetchAllVotings();
-      } catch (error) {
-        console.error("Error connecting to MetaMask:", error);
-      }
-    },
-    async fetchAllVotings() {
-      if (!this.contract) {
-        console.error("Contract is not initialized");
-        return;
-      }
-
-      try {
-        this.votings = await fetchAllVotings(this.contract);
-      } catch (error) {
-        console.error("Error fetching all votings:", error);
-        console.error("Error details:", error.message);
-        console.error("Error stack:", error.stack);
-      }
-    },
     selectVoting(votingId) {
+      console.log("Selected voting with ID (before conversion):", votingId);
+      console.log("Selected voting with ID (after conversion):", Number(votingId));
       this.$emit("select-voting", votingId);
     },
     async deleteVoting(votingId) {
@@ -77,9 +49,6 @@ export default {
       const date = new Date(timestamp);
       return date.toLocaleString();
     },
-  },
-  mounted() {
-    this.connectWallet();
   },
 };
 </script>

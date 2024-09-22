@@ -79,6 +79,7 @@ export default {
       }
     },
     onSelectVoting(votingId) {
+      console.log("Received voting ID in App:", votingId);
       this.selectedVotingId = Number(votingId);
     },
     async onDeleteVoting(votingId) {
