@@ -25,6 +25,53 @@ export async function connectWallet() {
   }
 }
 
+export async function createVoting(contract, web3, accounts, votingData) {
+  if (!contract) {
+    console.error("Contract is not initialized");
+    return;
+  }
+
+  try {
+    const { title, options, votingEnd, commission } = votingData;
+    const finishAt = Math.floor(new Date(votingEnd).getTime() / 1000); // Преобразуем в timestamp
+    const filteredOptions = options.filter(option => option.trim() !== ""); // Убираем пустые опции
+
+    // Получаем текущий nonce для аккаунта
+    const nonce = await web3.eth.getTransactionCount(accounts[0]);
+    console.log("Nonce:", nonce);
+
+    // Определяем gasLimit автоматически
+    const gasLimitBigInt = await contract.methods
+      .createVoting(title, finishAt, filteredOptions, commission)
+      .estimateGas({
+        from: accounts[0],
+        value: commission,
+      });
+
+    // Преобразуем BigInt в обычное число
+    const gasLimit = Number(gasLimitBigInt);
+    console.log("Gas limit:", gasLimit);
+
+    // Вызываем функцию контракта
+    await contract.methods
+      .createVoting(title, finishAt, filteredOptions, commission)
+      .send({
+        from: accounts[0],
+        value: commission, // Если функция payable, передаем значение
+        gasPrice: Web3.utils.toWei("1", "gwei"), // Укажите цену газа
+        gasLimit: gasLimit, // Укажите лимит газа
+        nonce: nonce, // Укажите nonce
+      });
+
+    console.log("Voting created successfully");
+  } catch (error) {
+    console.error("Error creating voting:", error);
+    console.error("Error details:", error.message);
+    console.error("Error stack:", error.stack);
+    throw error;
+  }
+}
+
 export async function fetchAllVotings(contract) {
   if (!contract) {
     console.error("Contract is not initialized");
