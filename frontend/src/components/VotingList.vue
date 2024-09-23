@@ -17,11 +17,17 @@
       </li>
     </ul>
   </div>
+  <PreloaderComponent v-if="loading" />
 </template>
 
 <script>
+import PreloaderComponent from "./PreloaderComponent.vue";
+
 export default {
   name: "VotingList",
+  components: {
+    PreloaderComponent,
+  },
   props: {
     votings: {
       type: Array,
@@ -40,6 +46,11 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      loading: false,
+    };
+  },
   computed: {
     activeVotings() {
       return this.votings.filter(voting => !voting.isDeleted);
@@ -55,13 +66,15 @@ export default {
       this.$emit("select-voting", votingId);
     },
     async deleteVoting(votingId) {
-      console.log("Deleting voting with ID:", votingId); // Выводим сообщение в консоль
+      this.loading = true;
       try {
         await this.$emit("delete-voting", votingId);
       } catch (error) {
         console.error("Error deleting voting:", error);
         console.error("Error details:", error.message);
         console.error("Error stack:", error.stack);
+      } finally {
+        this.loading = false;
       }
     },
     formatDate(timestamp) {
