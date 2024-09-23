@@ -10,6 +10,9 @@
         @select-voting="onSelectVoting"
         @delete-voting="onDeleteVoting"
         :votings="votings"
+        :contract="contract"
+        :web3="web3"
+        :accounts="accounts"
       />
       <VotingDetails
         :selectedVotingId="selectedVotingId"
