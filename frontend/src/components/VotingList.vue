@@ -9,6 +9,7 @@
           @click="deleteVoting(voting.id)"
           class="delete-button"
           :disabled="voting.finishAt > currentTimestamp"
+          :title="voting.finishAt > currentTimestamp ? 'Voting has not ended yet' : ''"
         >
           Delete
         </button>
