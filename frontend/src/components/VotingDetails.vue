@@ -8,9 +8,8 @@
         {{ option.name }} - {{ option.points }} number of votes
         <button
           @click="voteForOption(index)"
-          v-if="selectedVoting.finishAt > currentTimestamp"
-          :disabled="selectedVoting.voted"
-          :title="selectedVoting.voted ? 'You have already voted' : ''"
+          :disabled="selectedVoting.voted || selectedVoting.finishAt <= currentTimestamp"
+          :title="selectedVoting.voted ? 'You have already voted' : selectedVoting.finishAt <= currentTimestamp ? 'Voting has ended' : ''"
         >
           Vote
         </button>
