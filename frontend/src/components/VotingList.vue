@@ -12,12 +12,22 @@
 </template>
 
 <script>
-import { deleteVoting } from "../utils/blockchainUtils";
-
 export default {
   name: "VotingList",
   props: {
     votings: {
+      type: Array,
+      required: true,
+    },
+    contract: {
+      type: Object,
+      required: true,
+    },
+    web3: {
+      type: Object,
+      required: true,
+    },
+    accounts: {
       type: Array,
       required: true,
     },
@@ -36,9 +46,7 @@ export default {
     async deleteVoting(votingId) {
       console.log("Deleting voting with ID:", votingId); // Выводим сообщение в консоль
       try {
-        await deleteVoting(this.contract, this.web3, this.accounts, votingId);
-        // Обновляем список голосований после удаления
-        await this.fetchAllVotings();
+        await this.$emit("delete-voting", votingId);
       } catch (error) {
         console.error("Error deleting voting:", error);
         console.error("Error details:", error.message);

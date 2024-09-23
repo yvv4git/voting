@@ -137,6 +137,7 @@ export async function deleteVoting(contract, web3, accounts, votingId) {
 }
 
 export async function fetchVotingDetails(contract, votingId, fromAddress) {
+  console.log("fetchVotingDetails:", votingId, fromAddress);
   if (!contract) {
     console.error("Contract is not initialized");
     return null;
