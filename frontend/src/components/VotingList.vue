@@ -5,7 +5,13 @@
         <div @click="selectVoting(voting.id)" class="voting-item">
           {{ voting.name }} (Finish: {{ formatDate(voting.finishAt) }})
         </div>
-        <button @click="deleteVoting(voting.id)" class="delete-button">Delete</button>
+        <button
+          @click="deleteVoting(voting.id)"
+          class="delete-button"
+          :disabled="voting.finishAt > currentTimestamp"
+        >
+          Delete
+        </button>
       </li>
     </ul>
   </div>
@@ -35,6 +41,9 @@ export default {
   computed: {
     activeVotings() {
       return this.votings.filter(voting => !voting.isDeleted);
+    },
+    currentTimestamp() {
+      return Date.now();
     },
   },
   methods: {
@@ -97,7 +106,12 @@ li {
   margin-left: 10px;
 }
 
-.delete-button:hover {
+.delete-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.delete-button:hover:not(:disabled) {
   background-color: #e60000;
 }
 </style>

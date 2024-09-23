@@ -6,7 +6,13 @@
     <ul>
       <li v-for="(option, index) in selectedVoting.options" :key="index">
         {{ option.name }} - {{ option.points }} number of votes
-        <button @click="voteForOption(index)" v-if="!selectedVoting.voted">Vote</button>
+        <button
+          @click="voteForOption(index)"
+          v-if="!selectedVoting.voted && selectedVoting.finishAt > currentTimestamp"
+          :disabled="selectedVoting.finishAt <= currentTimestamp"
+        >
+          Vote
+        </button>
       </li>
     </ul>
   </div>
@@ -36,6 +42,11 @@ export default {
       accounts: [],
     };
   },
+  computed: {
+    currentTimestamp() {
+      return Date.now();
+    },
+  },
   methods: {
     async connectWallet() {
       console.log("Connecting to MetaMask...");
@@ -59,6 +70,7 @@ export default {
         // Передаем адрес кошелька в функцию fetchVotingDetails
         console.log("Fetching voting details...", votingId, this.accounts[0]);
         this.selectedVoting = await fetchVotingDetails(this.contract, votingId, this.accounts[0]);
+        console.log("Fetched voting details:", this.selectedVoting); // Добавляем отладочное сообщение
       } catch (error) {
         console.error("Error fetching voting details:", error);
         console.error("Error details:", error.message);
@@ -149,7 +161,12 @@ button {
   border-radius: 4px;
 }
 
-button:hover {
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
   background-color: #3da87a;
 }
 </style>
