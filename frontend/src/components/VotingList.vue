@@ -1,8 +1,9 @@
 <template>
   <div class="voting-list">
     <ul>
-      <li v-for="voting in activeVotings" :key="voting.id">
+      <li v-for="voting in activeVotings" :key="voting.id" :class="getStatusClass(voting)">
         <div @click="selectVoting(voting.id)" class="voting-item">
+          <span class="status-icon" :class="getStatusIconClass(voting)"></span>
           {{ voting.name }} (Finish: {{ formatDate(voting.finishAt) }})
         </div>
         <button
@@ -67,6 +68,12 @@ export default {
       const date = new Date(timestamp);
       return date.toLocaleString();
     },
+    getStatusClass(voting) {
+      return voting.finishAt > this.currentTimestamp ? 'active' : 'inactive';
+    },
+    getStatusIconClass(voting) {
+      return voting.finishAt > this.currentTimestamp ? 'active-icon' : 'inactive-icon';
+    },
   },
 };
 </script>
@@ -95,6 +102,24 @@ li {
 
 .voting-item {
   flex-grow: 1;
+  display: flex;
+  align-items: center;
+}
+
+.status-icon {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.active-icon {
+  background-color: green;
+}
+
+.inactive-icon {
+  background-color: red;
 }
 
 .delete-button {
@@ -114,5 +139,13 @@ li {
 
 .delete-button:hover:not(:disabled) {
   background-color: #e60000;
+}
+
+.active {
+  background-color: #e0ffe0; /* Светло-зеленый фон для активных голосований */
+}
+
+.inactive {
+  background-color: #f0f0f0; /* Светло-серый фон для неактивных голосований */
 }
 </style>
