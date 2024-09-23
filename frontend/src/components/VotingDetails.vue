@@ -2,7 +2,7 @@
   <div class="voting-details" v-if="selectedVoting">
     <h2>{{ selectedVoting.name }}</h2>
     <p>Finish At: {{ formatDate(selectedVoting.finishAt) }}</p>
-    <p>Is Deleted: {{ selectedVoting.isDeleted ? 'Yes' : 'No' }}</p>
+    <p>Status: {{ getStatusText(selectedVoting) }}</p>
     <ul>
       <li v-for="(option, index) in selectedVoting.options" :key="index">
         {{ option.name }} - {{ option.points }} number of votes
@@ -101,6 +101,9 @@ export default {
     formatDate(timestamp) {
       const date = new Date(timestamp);
       return date.toLocaleString();
+    },
+    getStatusText(voting) {
+      return voting.finishAt > this.currentTimestamp ? 'Active' : 'Completed';
     },
   },
   watch: {
