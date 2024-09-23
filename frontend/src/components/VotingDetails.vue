@@ -20,14 +20,19 @@
   <div v-else class="no-voting-selected">
     <p>Select the vote on the left to see the details.</p>
   </div>
+  <PreloaderComponent v-if="loading" />
 </template>
 
 <script>
 import { connectWallet, fetchVotingDetails, voteForOption } from "../utils/blockchainUtils";
 import Web3 from "web3";
+import PreloaderComponent from "./PreloaderComponent.vue";
 
 export default {
   name: "VotingDetails",
+  components: {
+    PreloaderComponent,
+  },
   props: {
     selectedVotingId: {
       type: Number,
@@ -41,6 +46,7 @@ export default {
       web3: null,
       contract: null,
       accounts: [],
+      loading: false,
     };
   },
   computed: {
@@ -50,6 +56,7 @@ export default {
   },
   methods: {
     async connectWallet() {
+      this.loading = true;
       console.log("Connecting to MetaMask...");
       try {
         const { web3, contract, accounts } = await connectWallet();
@@ -58,9 +65,12 @@ export default {
         this.accounts = accounts;
       } catch (error) {
         console.error("Error connecting to MetaMask:", error);
+      } finally {
+        this.loading = false;
       }
     },
     async fetchVotingDetails(votingId) {
+      this.loading = true;
       console.log("async fetchVotingDetails:", votingId);
       if (!this.contract) {
         console.error("Contract is not initialized");
@@ -76,9 +86,12 @@ export default {
         console.error("Error fetching voting details:", error);
         console.error("Error details:", error.message);
         console.error("Error stack:", error.stack);
+      } finally {
+        this.loading = false;
       }
     },
     async voteForOption(index) {
+      this.loading = true;
       if (!this.contract) {
         console.error("Contract is not initialized");
         return;
@@ -97,6 +110,8 @@ export default {
         console.error("Error voting:", error);
         console.error("Error details:", error.message);
         console.error("Error stack:", error.stack);
+      } finally {
+        this.loading = false;
       }
     },
     formatDate(timestamp) {
