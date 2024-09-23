@@ -3,6 +3,7 @@
     <h2>{{ selectedVoting.name }}</h2>
     <p>Finish At: {{ formatDate(selectedVoting.finishAt) }}</p>
     <p>Status: {{ getStatusText(selectedVoting) }}</p>
+    <p>Voted: {{ selectedVoting.voted ? 'Yes' : 'No' }}</p>
     <ul>
       <li v-for="(option, index) in selectedVoting.options" :key="index">
         {{ option.name }} - {{ option.points }} number of votes
@@ -23,7 +24,7 @@
 
 <script>
 import { connectWallet, fetchVotingDetails, voteForOption } from "../utils/blockchainUtils";
-import Web3 from "web3"; // Импортируем Web3
+import Web3 from "web3";
 
 export default {
   name: "VotingDetails",
@@ -86,7 +87,7 @@ export default {
       try {
         const votingId = this.selectedVoting.id; 
         const optionId = index; 
-        const value = Web3.utils.toWei("0.001", "ether"); // Укажите сумму для голосования
+        const value = Web3.utils.toWei("0.001", "ether");
 
         await voteForOption(this.contract, this.web3, this.accounts, votingId, optionId, value);
 
