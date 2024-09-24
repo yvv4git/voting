@@ -3,10 +3,17 @@ const { ethers } = require("hardhat");
 // Run:
 // npx hardhat run --network localHardhat scripts/votingDetails.js
 async function main() {
-    const [user1] = await ethers.getSigners();
+    const signers = await ethers.getSigners();
+    const user3 = signers[2];
 
-    // Вывод адреса кошелька user1
-    console.log(`User1 address: ${user1.address}`);
+    // Проверяем, что третий пользователь существует
+    if (!user3) {
+        console.error("Третий пользователь не найден.");
+        return;
+    }
+
+    // Вывод адреса кошелька user3
+    console.log(`User3 address: ${user3.address}`);
 
     // Адрес развернутого контракта (замените на реальный адрес)
     const contractAddress = "0x8464135c8F25Da09e49BC8782676a84730C318bC";
@@ -18,8 +25,8 @@ async function main() {
     // ID голосования, для которого нужно получить детали
     const votingId = 0;
 
-    // Получение детальной информации о голосовании
-    const votingDetails = await contractVotingList.getVotingDetails(votingId, { from: user1.address });
+    // Получение детальной информации о голосовании от имени user3
+    const votingDetails = await contractVotingList.connect(user3).getVotingDetails(votingId);
 
     // Вывод информации о голосовании в консоль
     console.log("");
