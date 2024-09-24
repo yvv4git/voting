@@ -1,10 +1,10 @@
 <template>
   <div class="voting-list">
     <ul>
-      <li v-for="voting in activeVotings" :key="voting.id" :class="getStatusClass(voting)">
+      <li v-for="voting in activeVotings" :key="voting.id" :class="getStatusClass(voting) + (selectedVotingId == voting.id ? ' selected' : '')">
         <div @click="selectVoting(voting.id)" class="voting-item">
           <span class="status-icon" :class="getStatusIconClass(voting)"></span>
-          {{ voting.name }} (Finish: {{ formatDate(voting.finishAt) }})
+          {{ voting.name }}
         </div>
         <button
           @click="deleteVoting(voting.id)"
@@ -44,6 +44,11 @@ export default {
     accounts: {
       type: Array,
       required: true,
+    },
+    selectedVotingId: {
+      type: Number,
+      required: false,
+      default: null,
     },
   },
   data() {
@@ -158,5 +163,9 @@ li {
 
 .inactive {
   background-color: #f0f0f0; /* Светло-серый фон для неактивных голосований */
+}
+
+.selected {
+  border: 2px solid #42b983; /* Контур для выбранного голосования */
 }
 </style>

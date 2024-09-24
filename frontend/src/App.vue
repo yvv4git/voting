@@ -20,6 +20,7 @@
         :contract="contract"
         :web3="web3"
         :accounts="accounts"
+        :selectedVotingId="selectedVotingId"
       />
       <VotingDetails
         :selectedVotingId="selectedVotingId"
