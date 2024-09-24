@@ -8,7 +8,7 @@ contract VotingList {
         string name; // Voting name
         uint256 finishAt; // Timestamp of voting end
         mapping(uint256 => Option) options; // List of options
-        mapping(address => uint256) votes; // Map of votes
+        mapping(address => Vote) votes; // Map of votes
         uint256 commission; // Commission for creating voting
         uint256 deleted_at; // Timestamp of deletion (0 if not deleted)
         uint256 optionsCount; // Number of options
@@ -18,6 +18,12 @@ contract VotingList {
     struct Option {
         string name; // Option name
         uint256 points; // Number of points
+    }
+
+    // Vote structure
+    struct Vote {
+        uint256 optionId; // Option ID
+        bool exists; // Indicates if the vote exists
     }
 
     // Structure for returning voting data
@@ -93,11 +99,16 @@ contract VotingList {
 
         Voting storage voting = votings[_votingId];
         require(
-            voting.votes[msg.sender] == 0,
+            !voting.votes[msg.sender].exists,
             "You have already voted"
         );
 
-        voting.votes[msg.sender] = _optionId;
+        require(
+            _optionId < voting.optionsCount,
+            "Option index out of bounds"
+        );
+
+        voting.votes[msg.sender] = Vote(_optionId, true);
         voting.options[_optionId].points++;
 
         emit Voted(_votingId, _optionId, msg.sender);
@@ -150,7 +161,7 @@ contract VotingList {
         detailedVoting.name = voting.name;
         detailedVoting.finishAt = voting.finishAt;
         detailedVoting.isDeleted = voting.deleted_at != 0;
-        detailedVoting.voted = voting.votes[msg.sender] != 0; // Check if the current wallet has voted
+        detailedVoting.voted = voting.votes[msg.sender].exists; // Check if the current wallet has voted
 
         detailedVoting.options = new Option[](voting.optionsCount);
         for (uint256 i = 0; i < voting.optionsCount; i++) {

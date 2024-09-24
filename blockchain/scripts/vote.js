@@ -4,10 +4,10 @@ const { ethers } = require("hardhat");
 // npx hardhat run --network localHardhat scripts/vote.js
 async function main() {
     const signers = await ethers.getSigners();
-    const user3 = signers[2];
+    const user1 = signers[0];
 
     // Проверяем, что третий пользователь существует
-    if (!user3) {
+    if (!user1) {
         console.error("Третий пользователь не найден.");
         return;
     }
@@ -19,13 +19,13 @@ async function main() {
     const VotingList = await ethers.getContractFactory("VotingList");
     const contractVotingList = await VotingList.attach(contractAddress);
 
-    // Голосование от имени user3
+    // Голосование от имени user1
     const votingId = 0;
     const optionId = 1;
     const voteAmount = ethers.parseEther("0.01"); // 0.01 ETH
 
-    // Вызываем метод контракта от имени user3
-    await contractVotingList.connect(user3).vote(votingId, optionId, { value: voteAmount });
+    // Вызываем метод контракта от имени user1
+    await contractVotingList.connect(user1).vote(votingId, optionId, { value: voteAmount });
 
     console.log("Voted");
 }
