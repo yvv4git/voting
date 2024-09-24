@@ -5,7 +5,7 @@
         <button @click="openModal">Add a vote</button>
       </div>
       <div class="wallet-status">
-        <span v-if="isConnected" class="connected-icon">🔵</span>
+        <span v-if="isConnected" class="connected-icon">🛜</span>
         <span v-else class="disconnected-icon">🔴</span>
         <span v-if="accounts.length > 0">
           {{ accounts[0].slice(-4) }}
@@ -145,7 +145,7 @@ export default {
 }
 
 .app-header {
-  background-color: #42b983;
+  background-color: #3e8db7;
   color: white;
   padding: 20px;
   text-align: left;

@@ -21,17 +21,25 @@
     <p>Select the vote on the left to see the details.</p>
   </div>
   <PreloaderComponent v-if="loading" />
+  <NotificationMessage
+    v-if="notification.show"
+    :message="notification.message"
+    :type="notification.type"
+    :duration="3000"
+  />
 </template>
 
 <script>
 import { connectWallet, fetchVotingDetails, voteForOption } from "../utils/blockchainUtils";
 import Web3 from "web3";
 import PreloaderComponent from "./PreloaderComponent.vue";
+import NotificationMessage from "./NotificationMessage.vue";
 
 export default {
   name: "VotingDetails",
   components: {
     PreloaderComponent,
+    NotificationMessage,
   },
   props: {
     selectedVotingId: {
@@ -47,6 +55,11 @@ export default {
       contract: null,
       accounts: [],
       loading: false,
+      notification: {
+        show: false,
+        message: "",
+        type: "success",
+      },
     };
   },
   computed: {
@@ -102,10 +115,20 @@ export default {
 
         // Обновляем детали голосования после голосования
         await this.fetchVotingDetails(votingId);
+
+        // Показываем сообщение об успешном голосовании
+        this.notification.show = true;
+        this.notification.message = "Voting successful!";
+        this.notification.type = "success";
       } catch (error) {
         console.error("Error voting:", error);
         console.error("Error details:", error.message);
         console.error("Error stack:", error.stack);
+
+        // Показываем сообщение о неуспешном голосовании
+        this.notification.show = true;
+        this.notification.message = "Voting failed!";
+        this.notification.type = "error";
       } finally {
         this.loading = false;
       }

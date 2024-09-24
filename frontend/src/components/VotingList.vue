@@ -18,15 +18,23 @@
     </ul>
   </div>
   <PreloaderComponent v-if="loading" />
+  <NotificationMessage
+    v-if="notification.show"
+    :message="notification.message"
+    :type="notification.type"
+    :duration="3000"
+  />
 </template>
 
 <script>
 import PreloaderComponent from "./PreloaderComponent.vue";
+import NotificationMessage from "./NotificationMessage.vue";
 
 export default {
   name: "VotingList",
   components: {
     PreloaderComponent,
+    NotificationMessage,
   },
   props: {
     votings: {
@@ -54,6 +62,11 @@ export default {
   data() {
     return {
       loading: false,
+      notification: {
+        show: false,
+        message: "",
+        type: "success",
+      },
     };
   },
   computed: {
@@ -72,10 +85,20 @@ export default {
       this.loading = true;
       try {
         await this.$emit("delete-voting", votingId);
+
+        // Показываем сообщение об успешном удалении
+        this.notification.show = true;
+        this.notification.message = "Voting deleted successfully!";
+        this.notification.type = "success";
       } catch (error) {
         console.error("Error deleting voting:", error);
         console.error("Error details:", error.message);
         console.error("Error stack:", error.stack);
+
+        // Показываем сообщение о неуспешном удалении
+        this.notification.show = true;
+        this.notification.message = "Voting deletion failed!";
+        this.notification.type = "error";
       } finally {
         this.loading = false;
       }
