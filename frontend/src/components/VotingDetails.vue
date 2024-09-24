@@ -71,17 +71,13 @@ export default {
     },
     async fetchVotingDetails(votingId) {
       this.loading = true;
-      console.log("async fetchVotingDetails:", votingId);
       if (!this.contract) {
         console.error("Contract is not initialized");
         return;
       }
 
       try {
-        // Передаем адрес кошелька в функцию fetchVotingDetails
-        console.log("Fetching voting details...", votingId, this.accounts[0]);
         this.selectedVoting = await fetchVotingDetails(this.contract, votingId, this.accounts[0]);
-        console.log("Fetched voting details:", this.selectedVoting); // Добавляем отладочное сообщение
       } catch (error) {
         console.error("Error fetching voting details:", error);
         console.error("Error details:", error.message);
@@ -124,7 +120,6 @@ export default {
   },
   watch: {
     selectedVotingId(newVotingId) {
-      console.log("Selected voting ID:", newVotingId);
       if (newVotingId !== null) {
         this.fetchVotingDetails(newVotingId);
       } else {
