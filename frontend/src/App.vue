@@ -4,6 +4,13 @@
       <div class="header-buttons">
         <button @click="openModal">Add a vote</button>
       </div>
+      <div class="wallet-status">
+        <span v-if="isConnected" class="connected-icon">🟢</span>
+        <span v-else class="disconnected-icon">🔴</span>
+        <span v-if="accounts.length > 0">
+          {{ accounts[0].slice(-4) }}
+        </span>
+      </div>
     </header>
     <div class="voting-container">
       <VotingList
@@ -51,17 +58,18 @@ export default {
       web3: null,
       contract: null,
       accounts: [],
+      isConnected: false, 
     };
   },
   methods: {
     resetState() {
-      // Сбрасываем все данные до их начальных значений
       this.selectedVotingId = null;
       this.showModal = false;
       this.votings = [];
       this.web3 = null;
       this.contract = null;
       this.accounts = [];
+      this.isConnected = false;
     },
     async connectWallet() {
       try {
@@ -69,9 +77,11 @@ export default {
         this.web3 = web3;
         this.contract = contract;
         this.accounts = accounts;
+        this.isConnected = true;
         await this.fetchAllVotings();
       } catch (error) {
         console.error("Error connecting to wallet:", error);
+        this.isConnected = false;
       }
     },
     async fetchAllVotings() {
@@ -146,6 +156,15 @@ export default {
 .header-buttons {
   display: flex;
   align-items: center;
+}
+
+.wallet-status {
+  display: flex;
+  align-items: center;
+}
+
+.connected-icon, .disconnected-icon {
+  margin-right: 5px;
 }
 
 .app-footer {
