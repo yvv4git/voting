@@ -9,12 +9,15 @@
         </div>
         <div class="form-group" v-for="(option, index) in newVoting.options" :key="index">
           <label :for="'option' + index"> {{ index + 1 }}:</label>
-          <input
-            type="text"
-            :id="'option' + index"
-            v-model="newVoting.options[index]"
-            required
-          />
+          <div class="option-input-group">
+            <input
+              type="text"
+              :id="'option' + index"
+              v-model="newVoting.options[index]"
+              required
+            />
+            <button type="button" @click="removeOption(index)" class="remove-option-button">Remove</button>
+          </div>
         </div>
         <div class="form-group">
           <label for="votingEnd">When does the voting end:</label>
@@ -47,7 +50,7 @@ export default {
     return {
       newVoting: {
         title: "",
-        options: ["", "", ""], // Начальные три варианта
+        options: ["", ""], // Начальные два варианта
         votingEnd: "", // Поле для даты и времени окончания голосования
       },
       web3: null,
@@ -68,6 +71,9 @@ export default {
     },
     addOption() {
       this.newVoting.options.push("");
+    },
+    removeOption(index) {
+      this.newVoting.options.splice(index, 1);
     },
     async addVoting() {
       if (!this.contract) {
@@ -143,5 +149,24 @@ button {
   padding: 10px 20px;
   margin-right: 10px;
   cursor: pointer;
+}
+
+.option-input-group {
+  display: flex;
+  align-items: center;
+}
+
+.remove-option-button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.remove-option-button:hover {
+  background-color: #e60000;
 }
 </style>
