@@ -77,13 +77,11 @@ export default {
     async fetchAllVotings() {
       try {
         this.votings = await fetchAllVotings(this.contract);
-        console.log("Votings:", this.votings);
       } catch (error) {
         console.error("Error fetching votings:", error);
       }
     },
     onSelectVoting(votingId) {
-      console.log("Received voting ID in App:", votingId);
       this.selectedVotingId = Number(votingId);
     },
     async onDeleteVoting(votingId) {

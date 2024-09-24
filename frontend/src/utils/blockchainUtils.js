@@ -9,7 +9,6 @@ export async function connectWallet() {
       await window.ethereum.request({ method: "eth_requestAccounts" });
       const web3 = new Web3(window.ethereum);
       const accounts = await web3.eth.getAccounts();
-      console.log("Connected accounts:", accounts);
 
       // Подключаемся к контракту
       const contract = new web3.eth.Contract(votingListABI, contractAddress);
@@ -38,7 +37,6 @@ export async function createVoting(contract, web3, accounts, votingData) {
 
     // Получаем текущий nonce для аккаунта
     const nonce = await web3.eth.getTransactionCount(accounts[0]);
-    console.log("Nonce:", nonce);
 
     // Определяем gasLimit автоматически
     const gasLimitBigInt = await contract.methods
@@ -50,7 +48,6 @@ export async function createVoting(contract, web3, accounts, votingData) {
 
     // Преобразуем BigInt в обычное число
     const gasLimit = Number(gasLimitBigInt);
-    console.log("Gas limit:", gasLimit);
 
     // Вызываем функцию контракта
     await contract.methods
@@ -81,7 +78,6 @@ export async function fetchAllVotings(contract) {
   try {
     // Получаем список всех голосований
     const votings = await contract.methods.getAllVotings().call();
-    console.log("Votings from contract:", votings);
 
     // Преобразуем данные в удобный формат
     return votings.map(voting => ({
@@ -117,7 +113,6 @@ export async function deleteVoting(contract, web3, accounts, votingId) {
 
     // Преобразуем BigInt в обычное число
     const gasLimit = Number(gasLimitBigInt);
-    console.log("Gas limit:", gasLimit);
 
     // Вызываем функцию контракта
     await contract.methods.deleteVoting(votingId).send({
@@ -137,7 +132,6 @@ export async function deleteVoting(contract, web3, accounts, votingId) {
 }
 
 export async function fetchVotingDetails(contract, votingId, fromAddress) {
-  console.log("fetchVotingDetails:", votingId, fromAddress);
   if (!contract) {
     console.error("Contract is not initialized");
     return null;
@@ -146,7 +140,6 @@ export async function fetchVotingDetails(contract, votingId, fromAddress) {
   try {
     // Получаем детальную информацию о голосовании с указанием адреса кошелька
     const votingDetails = await contract.methods.getVotingDetails(votingId).call({ from: fromAddress });
-    console.log("Raw Voting Details:", votingDetails); // Добавьте это для отладки
 
     // Преобразуем данные в удобный формат
     return {
@@ -185,10 +178,8 @@ export async function voteForOption(contract, web3, accounts, votingId, optionId
         from: accounts[0],
         value: value,
       });
-
-    // Преобразуем BigInt в обычное число
+      
     const gasLimit = Number(gasLimitBigInt);
-    console.log("Gas limit:", gasLimit);
 
     // Вызываем функцию контракта
     await contract.methods.vote(votingId, optionId).send({

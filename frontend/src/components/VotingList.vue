@@ -61,8 +61,6 @@ export default {
   },
   methods: {
     selectVoting(votingId) {
-      console.log("Selected voting with ID (before conversion):", votingId);
-      console.log("Selected voting with ID (after conversion):", Number(votingId));
       this.$emit("select-voting", votingId);
     },
     async deleteVoting(votingId) {
