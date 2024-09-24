@@ -7,7 +7,7 @@ async function main() {
     const signers = await ethers.getSigners();
 
     // Выбираем второй кошелек (индекс 1)
-    const deployer = signers[1];
+    const deployer = signers[0];
 
     console.log("Deploying contracts with the account:", deployer.address);
 
