@@ -39,3 +39,7 @@ hardhat_scripts_list:
 
 hardhat_test:
 	npx hardhat test
+
+
+analyze_statics:
+	slither contracts/VotingListContract.sol
