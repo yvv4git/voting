@@ -11,6 +11,9 @@
           {{ accounts[0].slice(-4) }}
         </span>
       </div>
+      <div class="contract-balance">
+        Contract Balance: {{ contractBalance }} ETH
+      </div>
     </header>
     <div class="voting-container">
       <VotingList
@@ -42,7 +45,7 @@
 import VotingList from "./components/VotingList.vue";
 import VotingDetails from "./components/VotingDetails.vue";
 import AddVotingModal from "./components/AddVotingModal.vue";
-import { connectWallet, fetchAllVotings, deleteVoting } from "./utils/blockchainUtils";
+import { connectWallet, fetchAllVotings, deleteVoting, getContractBalance } from "./utils/blockchainUtils";
 
 export default {
   name: "App",
@@ -59,7 +62,8 @@ export default {
       web3: null,
       contract: null,
       accounts: [],
-      isConnected: false, 
+      isConnected: false,
+      contractBalance: "0",
     };
   },
   methods: {
@@ -71,6 +75,7 @@ export default {
       this.contract = null;
       this.accounts = [];
       this.isConnected = false;
+      this.contractBalance = "0";
     },
     async connectWallet() {
       try {
@@ -80,6 +85,7 @@ export default {
         this.accounts = accounts;
         this.isConnected = true;
         await this.fetchAllVotings();
+        await this.fetchContractBalance();
       } catch (error) {
         console.error("Error connecting to wallet:", error);
         this.isConnected = false;
@@ -90,6 +96,13 @@ export default {
         this.votings = await fetchAllVotings(this.contract);
       } catch (error) {
         console.error("Error fetching votings:", error);
+      }
+    },
+    async fetchContractBalance() {
+      try {
+        this.contractBalance = await getContractBalance(this.web3, this.contract.options.address);
+      } catch (error) {
+        console.error("Error fetching contract balance:", error);
       }
     },
     onSelectVoting(votingId) {
@@ -166,6 +179,10 @@ export default {
 
 .connected-icon, .disconnected-icon {
   margin-right: 5px;
+}
+
+.contract-balance {
+  margin-left: 20px;
 }
 
 .app-footer {

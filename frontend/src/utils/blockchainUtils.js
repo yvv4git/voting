@@ -198,3 +198,19 @@ export async function voteForOption(contract, web3, accounts, votingId, optionId
     throw error;
   }
 }
+
+export async function getContractBalance(web3, contractAddress) {
+  if (!web3) {
+    console.error("Web3 is not initialized");
+    return "0";
+  }
+
+  try {
+    const balanceWei = await web3.eth.getBalance(contractAddress);
+    const balanceEth = web3.utils.fromWei(balanceWei, "ether");
+    return balanceEth;
+  } catch (error) {
+    console.error("Error fetching contract balance:", error);
+    return "0";
+  }
+}
