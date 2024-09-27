@@ -3,6 +3,7 @@
     <header class="app-header">
       <div class="header-buttons">
         <button @click="openModal">Add a vote</button>
+        <button @click="withdrawFunds">Withdraw</button>
       </div>
       <div class="wallet-status">
         <span v-if="isConnected" class="connected-icon">🛜</span>
@@ -45,7 +46,7 @@
 import VotingList from "./components/VotingList.vue";
 import VotingDetails from "./components/VotingDetails.vue";
 import AddVotingModal from "./components/AddVotingModal.vue";
-import { connectWallet, fetchAllVotings, deleteVoting, getContractBalance } from "./utils/blockchainUtils";
+import { connectWallet, fetchAllVotings, deleteVoting, getContractBalance, withdrawFunds } from "./utils/blockchainUtils";
 
 export default {
   name: "App",
@@ -103,6 +104,14 @@ export default {
         this.contractBalance = await getContractBalance(this.web3, this.contract.options.address);
       } catch (error) {
         console.error("Error fetching contract balance:", error);
+      }
+    },
+    async withdrawFunds() {
+      try {
+        await withdrawFunds(this.contract, this.web3, this.accounts);
+        await this.fetchContractBalance(); // Обновляем баланс после вывода средств
+      } catch (error) {
+        console.error("Error withdrawing funds:", error);
       }
     },
     onSelectVoting(votingId) {
