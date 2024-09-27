@@ -1,5 +1,3 @@
-// src/utils/blockchainUtils.js
-
 import Web3 from "web3";
 import { votingListABI, contractAddress } from "../components/contracts/votingList";
 
@@ -193,6 +191,59 @@ export async function voteForOption(contract, web3, accounts, votingId, optionId
     console.log("Voted successfully");
   } catch (error) {
     console.error("Error voting:", error);
+    console.error("Error details:", error.message);
+    console.error("Error stack:", error.stack);
+    throw error;
+  }
+}
+
+export async function getContractBalance(web3, contractAddress) {
+  if (!web3) {
+    console.error("Web3 is not initialized");
+    return "0";
+  }
+
+  try {
+    const balanceWei = await web3.eth.getBalance(contractAddress);
+    const balanceEth = web3.utils.fromWei(balanceWei, "ether");
+    return balanceEth;
+  } catch (error) {
+    console.error("Error fetching contract balance:", error);
+    return "0";
+  }
+}
+
+export async function withdrawFunds(contract, web3, accounts) {
+  if (!contract) {
+    console.error("Contract is not initialized");
+    return;
+  }
+
+  try {
+    // Получаем текущий nonce для аккаунта
+    const nonce = await web3.eth.getTransactionCount(accounts[0]);
+
+    // Определяем gasLimit автоматически
+    const gasLimitBigInt = await contract.methods
+      .withdraw(web3.utils.toWei(await getContractBalance(web3, contract.options.address), "ether"))
+      .estimateGas({
+        from: accounts[0],
+      });
+
+    // Преобразуем BigInt в обычное число
+    const gasLimit = Number(gasLimitBigInt);
+
+    // Вызываем функцию контракта
+    await contract.methods.withdraw(web3.utils.toWei(await getContractBalance(web3, contract.options.address), "ether")).send({
+      from: accounts[0],
+      gasPrice: Web3.utils.toWei("1", "gwei"), // Укажите цену газа
+      gasLimit: gasLimit, // Укажите лимит газа
+      nonce: nonce, // Укажите nonce
+    });
+
+    console.log("Funds withdrawn successfully");
+  } catch (error) {
+    console.error("Error withdrawing funds:", error);
     console.error("Error details:", error.message);
     console.error("Error stack:", error.stack);
     throw error;

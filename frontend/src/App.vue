@@ -3,6 +3,7 @@
     <header class="app-header">
       <div class="header-buttons">
         <button @click="openModal">Add a vote</button>
+        <button @click="withdrawFunds">Withdraw</button>
       </div>
       <div class="wallet-status">
         <span v-if="isConnected" class="connected-icon">🛜</span>
@@ -10,6 +11,9 @@
         <span v-if="accounts.length > 0">
           {{ accounts[0].slice(-4) }}
         </span>
+      </div>
+      <div class="contract-balance">
+        Contract Balance: {{ contractBalance }} ETH
       </div>
     </header>
     <div class="voting-container">
@@ -42,7 +46,7 @@
 import VotingList from "./components/VotingList.vue";
 import VotingDetails from "./components/VotingDetails.vue";
 import AddVotingModal from "./components/AddVotingModal.vue";
-import { connectWallet, fetchAllVotings, deleteVoting } from "./utils/blockchainUtils";
+import { connectWallet, fetchAllVotings, deleteVoting, getContractBalance, withdrawFunds } from "./utils/blockchainUtils";
 
 export default {
   name: "App",
@@ -59,7 +63,8 @@ export default {
       web3: null,
       contract: null,
       accounts: [],
-      isConnected: false, 
+      isConnected: false,
+      contractBalance: "0",
     };
   },
   methods: {
@@ -71,6 +76,7 @@ export default {
       this.contract = null;
       this.accounts = [];
       this.isConnected = false;
+      this.contractBalance = "0";
     },
     async connectWallet() {
       try {
@@ -80,6 +86,7 @@ export default {
         this.accounts = accounts;
         this.isConnected = true;
         await this.fetchAllVotings();
+        await this.fetchContractBalance();
       } catch (error) {
         console.error("Error connecting to wallet:", error);
         this.isConnected = false;
@@ -90,6 +97,21 @@ export default {
         this.votings = await fetchAllVotings(this.contract);
       } catch (error) {
         console.error("Error fetching votings:", error);
+      }
+    },
+    async fetchContractBalance() {
+      try {
+        this.contractBalance = await getContractBalance(this.web3, this.contract.options.address);
+      } catch (error) {
+        console.error("Error fetching contract balance:", error);
+      }
+    },
+    async withdrawFunds() {
+      try {
+        await withdrawFunds(this.contract, this.web3, this.accounts);
+        await this.fetchContractBalance(); // Обновляем баланс после вывода средств
+      } catch (error) {
+        console.error("Error withdrawing funds:", error);
       }
     },
     onSelectVoting(votingId) {
@@ -166,6 +188,10 @@ export default {
 
 .connected-icon, .disconnected-icon {
   margin-right: 5px;
+}
+
+.contract-balance {
+  margin-left: 20px;
 }
 
 .app-footer {

@@ -47,6 +47,9 @@ contract VotingList {
     // List of votings
     Voting[] public votings;
 
+    // Owner of the contract
+    address public owner;
+
     // Events
     event VotingCreated(
         uint256 indexed votingId,
@@ -55,6 +58,12 @@ contract VotingList {
     );
     event Voted(uint256 indexed votingId, uint256 optionId, address voter);
     event VotingDeleted(uint256 indexed votingId);
+    event Withdrawal(address indexed to, uint256 amount);
+
+    // Constructor to set the owner of the contract
+    constructor() {
+        owner = msg.sender;
+    }
 
     // Method for creating voting
     function createVoting(
@@ -185,5 +194,19 @@ contract VotingList {
         }
 
         return votingDataList;
+    }
+
+    // Method for withdrawing funds from the contract
+    function withdraw(uint256 _amount) public {
+        require(msg.sender == owner, "Only the owner can withdraw funds");
+        require(_amount <= address(this).balance, "Insufficient contract balance");
+
+        payable(msg.sender).transfer(_amount);
+        emit Withdrawal(msg.sender, _amount);
+    }
+
+    // Method for checking the contract balance
+    function getContractBalance() public view returns (uint256) {
+        return address(this).balance;
     }
 }
