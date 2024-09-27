@@ -3,7 +3,7 @@
     <header class="app-header">
       <div class="header-buttons">
         <button @click="openModal">Add a vote</button>
-        <button @click="withdrawFunds">Withdraw</button>
+        <button v-if="isOwner" @click="withdrawFunds">Withdraw</button>
       </div>
       <div class="wallet-status">
         <span v-if="isConnected" class="connected-icon">🛜</span>
@@ -65,6 +65,7 @@ export default {
       accounts: [],
       isConnected: false,
       contractBalance: "0",
+      isOwner: false,
     };
   },
   methods: {
@@ -77,6 +78,7 @@ export default {
       this.accounts = [];
       this.isConnected = false;
       this.contractBalance = "0";
+      this.isOwner = false;
     },
     async connectWallet() {
       try {
@@ -87,6 +89,7 @@ export default {
         this.isConnected = true;
         await this.fetchAllVotings();
         await this.fetchContractBalance();
+        await this.checkOwner(); // We check whether the current user is the owner of the contract
       } catch (error) {
         console.error("Error connecting to wallet:", error);
         this.isConnected = false;
@@ -109,7 +112,7 @@ export default {
     async withdrawFunds() {
       try {
         await withdrawFunds(this.contract, this.web3, this.accounts);
-        await this.fetchContractBalance(); // Обновляем баланс после вывода средств
+        await this.fetchContractBalance();
       } catch (error) {
         console.error("Error withdrawing funds:", error);
       }
@@ -122,10 +125,8 @@ export default {
         await deleteVoting(this.contract, this.web3, this.accounts, votingId);
         console.log("Voting deleted successfully");
 
-        // Обновляем список голосований
         await this.fetchAllVotings();
 
-        // Обновляем selectedVotingId, если удаляемое голосование было выбрано
         if (this.selectedVotingId === votingId) {
           this.selectedVotingId = null;
         }
@@ -142,12 +143,19 @@ export default {
       this.showModal = false;
     },
     voteForOption(votingId, optionIndex) {
-      // Логика голосования за вариант
       console.log("Vote for option:", optionIndex, "in voting with ID:", votingId);
+    },
+    async checkOwner() {
+      try {
+        const ownerAddress = await this.contract.methods.owner().call();
+        this.isOwner = this.accounts[0] === ownerAddress;
+      } catch (error) {
+        console.error("Error checking owner:", error);
+      }
     },
   },
   created() {
-    this.resetState(); // Сбрасываем состояние при создании компонента
+    this.resetState();
     this.connectWallet();
   },
 };
